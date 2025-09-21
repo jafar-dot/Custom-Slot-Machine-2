@@ -44,7 +44,8 @@
     .context button{padding:8px 10px;border-radius:6px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#04221a;font-weight:800;cursor:pointer}
     .footer{width:100%;max-width:1200px;text-align:center;color:#93a4b3;font-size:13px}
 
-  #waitMessage { display: none; color: #ff8080; margin-bottom: 6px; font-weight: bold; }
+    /* Progress & links */
+    #waitMessage { display: none; color: #ff8080; margin-bottom: 6px; font-weight: bold; }
 
     #progressContainer {
       width: 100%;
@@ -70,7 +71,7 @@
       font-weight: bold;
     }
     #links a:hover { text-decoration: underline; }
-    
+
   </style>
 </head>
 <body>
@@ -94,6 +95,7 @@
         <button class="btn" id="addLabel">Insert Label</button>
       </div>
     </div>
+
     <div class="canvasWrap">
       <div id="canvas" class="canvas">
         <div class="grid-bg"></div>
@@ -103,10 +105,20 @@
         <div class="sendRow">
           <button class="btn primary" id="send">Send</button>
         </div>
+        <div id="waitMessage">Processing...</div>
+        <div id="progressContainer">
+          <div id="progressFill"></div>
+        </div>
+        <div id="links">
+          <a id="playLink" href="#" target="_blank">Play Game</a>
+          <a id="downloadLink" href="#" target="_blank">Download</a>
+        </div>
       </div>
     </div>
+
     <div class="footer">Positions and sizes are scaled to 0..1024</div>
   </div>
+
   <div id="contextMenu" class="context">
     <div class="row"><label>x</label><input id="ctxX" type="number"/></div>
     <div class="row"><label>y</label><input id="ctxY" type="number"/></div>
@@ -118,9 +130,6 @@
       <button id="btnApply">Apply</button>
     </div>
   </div>
-
-
-
 <script>
 const canvas = document.getElementById('canvas');
 const contextMenu = document.getElementById('contextMenu');
