@@ -90,8 +90,288 @@
       <button id="btnApply">Apply</button>
     </div>
   </div>
-  <script>
-    /* script stays unchanged from your single-line version */
-  </script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+const canvas = document.getElementById('canvas');
+const contextMenu = document.getElementById('contextMenu');
+const ctxX = document.getElementById('ctxX'),
+      ctxY = document.getElementById('ctxY'),
+      ctxW = document.getElementById('ctxW'),
+      ctxH = document.getElementById('ctxH'),
+      ctxText = document.getElementById('ctxText'),
+      textRow = document.getElementById('textRow');
+
+const elements = {
+  grid: null,
+  play_button: null,
+  increase_button: null,
+  decrease_button: null,
+  auto_play_button: null,
+  max_bet_button: null,
+  min_bet_button: null,
+  get_free_spins_button: null,
+  win_label: null,
+  labels: []
+};
+
+let current = null;
+
+function create(type) {
+  if (type !== 'label' && elements[type]) return;
+
+  const el = document.createElement('div');
+  el.className = 'element ' + (type === 'label' ? 'label' : type);
+  el.style.width = '120px';
+  el.style.height = '56px';
+  el.style.left = '32px';
+  el.style.top = '32px';
+  el.dataset.type = type;
+
+  if (type === 'label') {
+    const span = document.createElement('span');
+    span.textContent = 'Label';
+    el.appendChild(span);
+  } else {
+    el.textContent = type.replace(/_/g, ' ').toUpperCase();
+  }
+
+  const handle = document.createElement('div');
+  handle.className = 'handle';
+  el.appendChild(handle);
+
+  canvas.appendChild(el);
+
+  if (type === 'label') {
+    elements.labels.push(el);
+  } else {
+    elements[type] = el;
+  }
+
+  attach(el, handle);
+}
+
+function attach(el, handle) {
+  el.addEventListener('mousedown', startDrag);
+  handle.addEventListener('mousedown', startResize);
+  handle.addEventListener('mouseenter', () => showBadge(el));
+  handle.addEventListener('mouseleave', () => hideBadge(el));
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    current = el;
+    openContext(e.pageX, e.pageY);
+  });
+}
+
+function getPos(el) {
+  const r = el.getBoundingClientRect(),
+        p = canvas.getBoundingClientRect();
+  return {
+    x: Math.round(r.left - p.left),
+    y: Math.round(r.top - p.top),
+    width: Math.round(r.width),
+    height: Math.round(r.height)
+  };
+}
+
+function showBadge(el) {
+  if (el._badge) return updateBadge(el);
+  const b = document.createElement('div');
+  b.className = 'badge';
+  el._badge = b;
+  el.appendChild(b);
+  updateBadge(el);
+}
+
+function updateBadge(el) {
+  const d = getPos(el);
+  el._badge.textContent = `x=${d.x} y=${d.y} w=${d.width} h=${d.height}`;
+}
+
+function hideBadge(el) {
+  if (el._badge) {
+    el._badge.remove();
+    el._badge = null;
+  }
+}
+
+function startDrag(e) {
+  if (e.target.classList.contains('handle')) return;
+  e.preventDefault();
+  const el = this;
+  const rect = el.getBoundingClientRect(),
+        p = canvas.getBoundingClientRect();
+  const startX = e.clientX,
+        startY = e.clientY;
+  const origX = rect.left - p.left,
+        origY = rect.top - p.top;
+
+  function move(ev) {
+    const nx = Math.max(0, Math.min(origX + ev.clientX - startX, canvas.clientWidth - el.offsetWidth));
+    const ny = Math.max(0, Math.min(origY + ev.clientY - startY, canvas.clientHeight - el.offsetHeight));
+    el.style.left = nx + 'px';
+    el.style.top = ny + 'px';
+    if (el._badge) updateBadge(el);
+  }
+
+  function up() {
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+  }
+
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+function startResize(e) {
+  e.stopPropagation();
+  e.preventDefault();
+  const el = this.parentElement;
+  el._resizing = true;
+  const startX = e.clientX,
+        startY = e.clientY,
+        startW = el.offsetWidth,
+        startH = el.offsetHeight;
+
+  function move(ev) {
+    let rawLeft = parseInt(el.style.left) || el.offsetLeft;
+    let rawTop = parseInt(el.style.top) || el.offsetTop;
+    let nw = Math.max(24, Math.min(startW + ev.clientX - startX, canvas.clientWidth - rawLeft));
+    let nh = Math.max(24, Math.min(startH + ev.clientY - startY, canvas.clientHeight - rawTop));
+    el.style.width = nw + 'px';
+    el.style.height = nh + 'px';
+    if (el._badge) updateBadge(el);
+  }
+
+  function up() {
+    el._resizing = false;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+  }
+
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+function openContext(pageX, pageY) {
+  const d = getPos(current);
+  ctxX.value = d.x;
+  ctxY.value = d.y;
+  ctxW.value = d.width;
+  ctxH.value = d.height;
+  textRow.style.display = current.dataset.type === 'label' ? 'flex' : 'none';
+  ctxText.value = current.dataset.type === 'label' ? current.textContent.trim() : '';
+  contextMenu.style.left = pageX + 'px';
+  contextMenu.style.top = pageY + 'px';
+  contextMenu.style.display = 'flex';
+}
+
+document.getElementById('btnApply').addEventListener('click', () => {
+  if (!current) return;
+  const nx = Number(ctxX.value) || 0,
+        ny = Number(ctxY.value) || 0,
+        nw = Math.max(8, Number(ctxW.value) || 8),
+        nh = Math.max(8, Number(ctxH.value) || 8);
+  const c = canvas.getBoundingClientRect();
+  if (nx + nw > c.width || ny + nh > c.height) {
+    alert("Values exceed 1024 boundary");
+    return;
+  }
+  current.style.left = nx + 'px';
+  current.style.top = ny + 'px';
+  current.style.width = nw + 'px';
+  current.style.height = nh + 'px';
+  if (current.dataset.type === 'label') current.firstElementChild.textContent = ctxText.value;
+  contextMenu.style.display = 'none';
+  hideBadge(current);
+});
+
+document.getElementById('btnDelete').addEventListener('click', () => {
+  if (!current) return;
+  const t = current.dataset.type;
+  current.remove();
+  if (t === 'label') {
+    const i = elements.labels.indexOf(current);
+    if (i > -1) elements.labels.splice(i, 1);
+  } else {
+    elements[t] = null;
+  }
+  contextMenu.style.display = 'none';
+});
+
+document.addEventListener('click', e => {
+  if (!contextMenu.contains(e.target)) contextMenu.style.display = 'none';
+});
+
+document.getElementById('addGrid').addEventListener('click', () => create('grid'));
+document.querySelectorAll('.dropdown-content button').forEach(b =>
+  b.addEventListener('click', () => create(b.dataset.type))
+);
+document.getElementById('addWin').addEventListener('click', () => create('win_label'));
+document.getElementById('addLabel').addEventListener('click', () => create('label'));
+
+canvas.addEventListener('mousemove', e => {
+  const els = [...canvas.querySelectorAll('.element')];
+  els.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const hx = rect.right - 12,
+          hy = rect.bottom - 12;
+    const mx = e.clientX,
+          my = e.clientY;
+    const overHandle = mx >= hx - 12 && mx <= hx + 12 && my >= hy - 12 && my <= hy + 12;
+    if (overHandle) showBadge(el);
+    else if (!el.matches(':hover') && !el._resizing) hideBadge(el);
+  });
+});
+
+document.getElementById('send').addEventListener('click', () => {
+  const payload = {};
+  const c = canvas.getBoundingClientRect();
+
+  function to1024(v, axis) {
+    return Math.round(v / (axis === 0 ? c.width : c.height) * 1024);
+  }
+
+  for (const k in elements) {
+    if (k === 'labels') continue;
+    if (elements[k]) {
+      const d = getPos(elements[k]);
+      payload[k] = {
+        x: to1024(d.x, 0),
+        y: to1024(d.y, 1),
+        width: to1024(d.width, 0),
+        height: to1024(d.height, 1)
+      };
+    }
+  }
+
+  payload.Labels = elements.labels.map(l => {
+    const d = getPos(l);
+    return {
+      x: to1024(d.x, 0),
+      y: to1024(d.y, 1),
+      width: to1024(d.width, 0),
+      height: to1024(d.height, 1),
+      text: l.firstElementChild ? l.firstElementChild.textContent : ''
+    };
+  });
+
+  payload.message = document.getElementById('msgInput').value;
+  console.log(JSON.stringify(payload, null, 2));
+});
+</script>
+
+
+
+  
 </body>
 </html>
