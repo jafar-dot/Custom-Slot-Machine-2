@@ -1,152 +1,504 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dynamic Editor</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Editor</title>
 <style>
-body{margin:0;padding:0;display:flex;flex-direction:column;height:100vh;background:#0b0f19;color:#fff;font-family:'Segoe UI',sans-serif}
-#toolbar{display:flex;gap:10px;padding:12px;background:#111827;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.6)}
-button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;transition:all .2s}
-button:hover{transform:translateY(-2px);background:linear-gradient(135deg,#4f46e5,#7c3aed)}
-#canvas{flex:1;margin:14px auto;width:95%;border-radius:14px;border:2px solid #1f2937;position:relative;background:#0f172a;overflow:hidden}
-.grid-bg{position:absolute;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(#1f2937 1px,transparent 1px),linear-gradient(90deg,#1f2937 1px,transparent 1px);background-size:var(--grid,20px) var(--grid,20px);pointer-events:none;z-index:0}
-.element{position:absolute;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:bold;cursor:pointer;z-index:1;box-shadow:0 4px 10px rgba(0,0,0,.4)}
-.grid{background:#3b82f6}
-.play_button{background:#ef4444}
-.increase_button{background:#10b981}
-.decrease_button{background:#f59e0b}
-.win_label{background:#8b5cf6}
-.handle{width:16px;height:16px;background:#fff;border:2px solid #000;border-radius:50%;position:absolute;bottom:-10px;right:-10px;cursor:se-resize;z-index:2}
-.handle-label{position:absolute;bottom:-32px;right:0;background:#111827;color:#f9fafb;padding:4px 8px;border-radius:6px;font-size:11px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.5);display:none}
-.context-menu{position:absolute;background:#111827;border:1px solid #374151;border-radius:8px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.6)}
-.context-menu input{width:80px;padding:6px;border:1px solid #374151;border-radius:6px;background:#1f2937;color:#fff;font-size:13px}
-.context-menu button{padding:6px 10px;font-size:13px;background:#2563eb;border:none;border-radius:6px;cursor:pointer}
-#infoArea{padding:10px;background:#111827;border-top:2px solid #1f2937;display:flex;flex-direction:column;gap:8px}
-textarea{width:100%;height:60px;padding:6px;font-size:14px;border:1px solid #374151;border-radius:8px;background:#1f2937;color:#fff;resize:none}
+:root {
+  --bg:#071026;
+  --panel:#0d1420;
+  --accent1:#6ee7b7;
+  --accent2:#7dd3fc;
+  --muted:#93a4b3;
+  --glass:rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Arial;background:linear-gradient(180deg,var(--bg),#04101a);color:#e7f6f2}
+.container{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px;gap:14px}
+.header{width:100%;max-width:1200px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#04201a}
+.title{font-size:18px;font-weight:700}
+.toolbar{display:flex;gap:10px}
+.btn{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,#0b1220,#0f1724);color:var(--accent2);cursor:pointer;font-weight:700;box-shadow:0 8px 20px rgba(2,6,23,0.6)}
+.btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#04221a}
+.canvasWrap{width:100%;max-width:1024px;display:flex;flex-direction:column;gap:10px}
+.canvas{width:100%;aspect-ratio:1/1;border-radius:12px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(2,6,23,0.6);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:24px 24px,24px 24px;pointer-events:none}
+.controlsPanel{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.side{display:flex;gap:12px}
+.panel{background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);color:var(--muted);min-width:200px;max-width:360px}
+.textarea{width:100%;height:80px;padding:8px;border-radius:8px;border:none;background:#07182a;color:#dff8ef;resize:none}
+.sendRow{display:flex;gap:8px;margin-top:8px}
+.element{position:absolute;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#07121a;user-select:none;box-shadow:0 8px 20px rgba(2,6,23,0.6)}
+.grid{background:linear-gradient(180deg,rgba(37,99,235,0.9),rgba(96,165,250,0.85));color:#fff;border:2px solid rgba(255,255,255,0.06)}
+.play_button{background:linear-gradient(90deg,#ef4444,#fb7185);color:#fff;border:2px solid rgba(255,255,255,0.06)}
+.increase_button{background:linear-gradient(90deg,#10b981,#34d399);color:#04221a;border:2px solid rgba(255,255,255,0.04)}
+.decrease_button{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#04221a;border:2px solid rgba(255,255,255,0.04)}
+.win_label{background:linear-gradient(90deg,#8b5cf6,#c084fc);color:#07121a;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+.label{background:linear-gradient(90deg,#60a5fa,#7dd3fc);color:#031724;padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+.handle{position:absolute;right:-10px;bottom:-10px;width:18px;height:18px;border-radius:6px;background:#fff;border:2px solid rgba(0,0,0,0.12);cursor:se-resize;z-index:20}
+.badge{position:absolute;transform:translate(10px,-44px);background:rgba(2,12,20,0.9);color:#bfeee1;padding:6px 8px;border-radius:8px;font-size:12px;z-index:30;pointer-events:none}
+.context{position:absolute;display:none;flex-direction:column;gap:8px;padding:10px;border-radius:8px;background:#071429;border:1px solid rgba(255,255,255,0.04);z-index:60;min-width:220px}
+.context input{padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:#071827;color:#e6fbf6}
+.context .row{display:flex;gap:8px}
+.context .actions{display:flex;gap:8px;justify-content:flex-end}
+.context button{padding:8px 10px;border-radius:6px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#04221a;font-weight:800;cursor:pointer}
+.listItem{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.02)}
+.footer{width:100%;max-width:1200px;text-align:center;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
-<div id="toolbar">
-  <button id="addGrid">Insert Grid</button>
-  <button id="addPlay">Insert Play</button>
-  <button id="addIncrease">Insert +</button>
-  <button id="addDecrease">Insert -</button>
-  <button id="addWin">Insert Win</button>
+<div class="container">
+  <div class="header">
+    <div class="brand">
+      <div class="logo">AI</div>
+      <div><div class="title">Editor</div></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="addGrid">Insert Grid</button>
+      <button class="btn" id="addPlay">Insert Play</button>
+      <button class="btn" id="addIncrease">Insert +</button>
+      <button class="btn" id="addDecrease">Insert -</button>
+      <button class="btn" id="addWin">Insert Win</button>
+      <button class="btn" id="addLabel">Insert Label</button>
+    </div>
+  </div>
+  <div class="canvasWrap">
+    <div id="canvas" class="canvas"><div class="grid-bg" id="gridBg"></div></div>
+    <div class="controlsPanel">
+      <div class="panel">
+        <div style="font-weight:800;margin-bottom:8px">Prompt</div>
+        <textarea id="msgInput" class="textarea" placeholder="Type prompt..."></textarea>
+        <div class="sendRow"><button class="btn primary" id="send">Send</button></div>
+      </div>
+      <div class="panel" id="infoPanel">
+        <div style="font-weight:800;margin-bottom:8px">Elements</div>
+        <div id="list"></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">Positions and sizes will be exported as 0..1024 relative coordinates</div>
 </div>
-<div id="canvas"><div class="grid-bg"></div></div>
-<div id="infoArea">
-  <textarea id="msgInput" placeholder="Type prompt..."></textarea>
-  <button id="send">Send</button>
+
+<div id="contextMenu" class="context">
+  <div class="row"><input id="ctxX" placeholder="x" type="number"/><input id="ctxY" placeholder="y" type="number"/></div>
+  <div class="row"><input id="ctxW" placeholder="width" type="number"/><input id="ctxH" placeholder="height" type="number"/></div>
+  <input id="ctxText" placeholder="text (labels)"/>
+  <div class="actions">
+    <button id="btnDelete">Delete</button>
+    <button id="btnApply">Apply</button>
+  </div>
 </div>
-<div id="contextMenu" class="context-menu">
-  <input id="xVal" placeholder="x">
-  <input id="yVal" placeholder="y">
-  <input id="wVal" placeholder="w">
-  <input id="hVal" placeholder="h">
-  <button id="applyVals">Apply</button>
-</div>
+
 <script>
-const canvas=document.getElementById('canvas')
-const contextMenu=document.getElementById('contextMenu')
-const inputs={x:document.getElementById('xVal'),y:document.getElementById('yVal'),w:document.getElementById('wVal'),h:document.getElementById('hVal')}
-let elements={grid:null,play_button:null,increase_button:null,decrease_button:null,win_label:null}
-let currentEl=null
-function createElement(type){
-  if(elements[type])return
-  const el=document.createElement('div')
-  el.classList.add('element',type)
-  el.style.width='120px'
-  el.style.height='70px'
-  el.style.left='50px'
-  el.style.top='50px'
-  const handle=document.createElement('div')
-  handle.classList.add('handle')
-  const label=document.createElement('div')
-  label.classList.add('handle-label')
-  el.appendChild(handle)
-  el.appendChild(label)
-  canvas.appendChild(el)
-  elements[type]=el
-  makeDraggable(el)
-  makeResizable(el,handle,label)
-  el.oncontextmenu=e=>{e.preventDefault();currentEl=el;showContextMenu(e.pageX,e.pageY)}
-}
-function makeDraggable(el){
-  let startX,startY,origX,origY
-  el.addEventListener('mousedown',e=>{
-    if(e.target.classList.contains('handle'))return
-    startX=e.clientX;startY=e.clientY
-    const rect=el.getBoundingClientRect(),p=canvas.getBoundingClientRect()
-    origX=rect.left-p.left;origY=rect.top-p.top
-    function move(ev){
-      let newX=Math.max(0,Math.min(origX+ev.clientX-startX,canvas.clientWidth-el.offsetWidth))
-      let newY=Math.max(0,Math.min(origY+ev.clientY-startY,canvas.clientHeight-el.offsetHeight))
-      el.style.left=newX+'px';el.style.top=newY+'px'
-    }
-    function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up)}
-    document.addEventListener('mousemove',move)
-    document.addEventListener('mouseup',up)
-  })
-}
-function makeResizable(el,handle,label){
-  let startX,startY,startW,startH
-  handle.addEventListener('mouseover',()=>{updateLabel(el,label);label.style.display='block'})
-  handle.addEventListener('mouseout',()=>{label.style.display='none'})
-  handle.addEventListener('mousedown',e=>{
-    e.stopPropagation()
-    startX=e.clientX;startY=e.clientY
-    startW=el.offsetWidth;startH=el.offsetHeight
-    function move(ev){
-      let newW=Math.max(30,startW+ev.clientX-startX)
-      let newH=Math.max(30,startH+ev.clientY-startY)
-      el.style.width=newW+'px';el.style.height=newH+'px'
-      updateLabel(el,label)
-    }
-    function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up)}
-    document.addEventListener('mousemove',move)
-    document.addEventListener('mouseup',up)
-  })
-}
-function updateLabel(el,label){
-  const r=el.getBoundingClientRect(),p=canvas.getBoundingClientRect()
-  label.textContent=`x=${r.left-p.left|0},y=${r.top-p.top|0},w=${r.width|0},h=${r.height|0}`
-}
-function showContextMenu(x,y){
-  const r=currentEl.getBoundingClientRect(),p=canvas.getBoundingClientRect()
-  inputs.x.value=r.left-p.left|0
-  inputs.y.value=r.top-p.top|0
-  inputs.w.value=r.width|0
-  inputs.h.value=r.height|0
-  contextMenu.style.display='flex'
-  contextMenu.style.left=x+'px'
-  contextMenu.style.top=y+'px'
-}
-document.addEventListener('click',e=>{if(!contextMenu.contains(e.target))contextMenu.style.display='none'})
-document.getElementById('applyVals').onclick=()=>{
-  if(!currentEl)return
-  currentEl.style.left=inputs.x.value+'px'
-  currentEl.style.top=inputs.y.value+'px'
-  currentEl.style.width=inputs.w.value+'px'
-  currentEl.style.height=inputs.h.value+'px'
-  contextMenu.style.display='none'
-}
-document.getElementById('addGrid').onclick=()=>createElement('grid')
-document.getElementById('addPlay').onclick=()=>createElement('play_button')
-document.getElementById('addIncrease').onclick=()=>createElement('increase_button')
-document.getElementById('addDecrease').onclick=()=>createElement('decrease_button')
-document.getElementById('addWin').onclick=()=>createElement('win_label')
-document.getElementById('send').onclick=()=>{
-  const msg=document.getElementById('msgInput').value
-  const data={message:msg}
-  for(let k in elements){
-    if(elements[k]){
-      const r=elements[k].getBoundingClientRect(),p=canvas.getBoundingClientRect();
-      data[k]={x:r.left-p.left|0,y:r.top-p.top|0,width:r.width|0,height:r.height|0}
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+const canvas = document.getElementById('canvas');
+const gridBg = document.getElementById('gridBg');
+const listEl = document.getElementById('list');
+const contextMenu = document.getElementById('contextMenu');
+const ctxX = document.getElementById('ctxX'),
+      ctxY = document.getElementById('ctxY'),
+      ctxW = document.getElementById('ctxW'),
+      ctxH = document.getElementById('ctxH'),
+      ctxText = document.getElementById('ctxText');
+
+const elements = {
+  grid: null,
+  play_button: null,
+  increase_button: null,
+  decrease_button: null,
+  win_label: null,
+  labels: []
+};
+
+let current = null;
+
+function create(type) {
+  if (type !== 'label' && elements[type]) return;
+
+  const el = document.createElement('div');
+  el.className = 'element ' + (type === 'label' ? 'label' : type);
+  el.style.width = type === 'grid' ? '360px' : '120px';
+  el.style.height = type === 'grid' ? '360px' : '56px';
+  el.style.left = '32px';
+  el.style.top = '32px';
+  el.dataset.type = type;
+
+  if (type === 'label') {
+    const span = document.createElement('span');
+    span.textContent = 'Label';
+    span.style.pointerEvents = 'none';
+    el.appendChild(span);
+  } else {
+    el.textContent =
+      type === 'grid' ? 'GRID' :
+      type === 'play_button' ? 'PLAY' :
+      type === 'increase_button' ? '+' :
+      type === 'decrease_button' ? '-' :
+      type === 'win_label' ? 'WIN' : '';
   }
-  console.log(JSON.stringify(data))
+
+  const handle = document.createElement('div');
+  handle.className = 'handle';
+  el.appendChild(handle);
+  canvas.appendChild(el);
+
+  if (type === 'label') {
+    elements.labels.push(el);
+  } else {
+    elements[type] = el;
+  }
+
+  attach(el, handle);
+  renderList();
+  if (type === 'label') openContextFor(el);
 }
+
+function attach(el, handle) {
+  el.addEventListener('mousedown', startDrag);
+  handle.addEventListener('mousedown', startResize);
+  handle.addEventListener('mouseenter', () => showBadge(el));
+  handle.addEventListener('mouseleave', () => hideBadge(el));
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    current = el;
+    openContext(e.pageX, e.pageY);
+  });
+  el.addEventListener('dblclick', e => {
+    e.preventDefault();
+    current = el;
+    openContext(e.pageX, e.pageY);
+  });
+}
+
+function getPos(el) {
+  const r = el.getBoundingClientRect(),
+        p = canvas.getBoundingClientRect();
+  return {
+    x: Math.round(r.left - p.left),
+    y: Math.round(r.top - p.top),
+    width: Math.round(r.width),
+    height: Math.round(r.height)
+  };
+}
+
+function showBadge(el) {
+  if (el._badge) return updateBadge(el);
+  const b = document.createElement('div');
+  b.className = 'badge';
+  el._badge = b;
+  el.appendChild(b);
+  updateBadge(el);
+}
+
+function updateBadge(el) {
+  const d = getPos(el);
+  el._badge.textContent = `x=${d.x} y=${d.y} w=${d.width} h=${d.height}`;
+}
+
+function hideBadge(el) {
+  if (el._badge) {
+    el._badge.remove();
+    el._badge = null;
+  }
+}
+
+// --- Dragging ---
+function startDrag(e) {
+  if (e.target.classList.contains('handle')) return;
+  e.preventDefault();
+
+  const el = this;
+  const rect = el.getBoundingClientRect(),
+        p = canvas.getBoundingClientRect();
+  const startX = e.clientX,
+        startY = e.clientY;
+  const origX = rect.left - p.left,
+        origY = rect.top - p.top;
+
+  function move(ev) {
+    const nx = Math.max(0, Math.min(origX + ev.clientX - startX, canvas.clientWidth - el.offsetWidth));
+    const ny = Math.max(0, Math.min(origY + ev.clientY - startY, canvas.clientHeight - el.offsetHeight));
+    el.style.left = nx + 'px';
+    el.style.top = ny + 'px';
+    if (el._badge) updateBadge(el);
+  }
+
+  function up() {
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    renderList();
+  }
+
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+// --- Resizing ---
+function startResize(e) {
+  e.stopPropagation();
+  e.preventDefault();
+
+  const handle = this;
+  const el = handle.parentElement;
+  el._resizing = true;
+
+  const startX = e.clientX,
+        startY = e.clientY,
+        startW = el.offsetWidth,
+        startH = el.offsetHeight;
+
+  function move(ev) {
+    let rawLeft = parseInt(el.style.left) || el.offsetLeft;
+    let rawTop = parseInt(el.style.top) || el.offsetTop;
+
+    let nw = Math.max(24, Math.min(startW + ev.clientX - startX, canvas.clientWidth - rawLeft));
+    let nh = Math.max(24, Math.min(startH + ev.clientY - startY, canvas.clientHeight - rawTop));
+
+    if (el.dataset.type === 'grid') nh = nw;
+
+    el.style.width = nw + 'px';
+    el.style.height = nh + 'px';
+    if (el._badge) updateBadge(el);
+  }
+
+  function up() {
+    el._resizing = false;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    renderList();
+  }
+
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+// --- Context menu ---
+function openContext(pageX, pageY) {
+  const p = canvas.getBoundingClientRect();
+  contextMenu.style.left = Math.min(window.innerWidth - 260, pageX) + 'px';
+  contextMenu.style.top = Math.min(window.innerHeight - 200, pageY) + 'px';
+
+  const d = getPos(current);
+  ctxX.value = d.x;
+  ctxY.value = d.y;
+  ctxW.value = d.width;
+  ctxH.value = d.height;
+
+  ctxText.style.display = current.dataset.type === 'label' ? 'block' : 'none';
+  ctxText.value = current.dataset.type === 'label' ? current.textContent.trim() : '';
+
+  contextMenu.style.display = 'flex';
+}
+
+document.getElementById('btnApply').addEventListener('click', () => {
+  if (!current) return;
+
+  const nx = Math.round(Number(ctxX.value) || 0),
+        ny = Math.round(Number(ctxY.value) || 0);
+  let nw = Math.max(8, Math.round(Number(ctxW.value) || 8)),
+      nh = Math.max(8, Math.round(Number(ctxH.value) || 8));
+
+  if (current.dataset.type === 'grid') nh = nw;
+  nw = Math.min(nw, canvas.clientWidth - nx);
+  nh = Math.min(nh, canvas.clientHeight - ny);
+
+  current.style.left = nx + 'px';
+  current.style.top = ny + 'px';
+  current.style.width = nw + 'px';
+  current.style.height = nh + 'px';
+
+  if (current.dataset.type === 'label')
+    current.firstElementChild.textContent = ctxText.value;
+
+  contextMenu.style.display = 'none';
+  hideBadge(current);
+  renderList();
+});
+
+document.getElementById('btnDelete').addEventListener('click', () => {
+  if (!current) return;
+  const t = current.dataset.type;
+  current.remove();
+
+  if (t === 'label') {
+    const i = elements.labels.indexOf(current);
+    if (i > -1) elements.labels.splice(i, 1);
+  } else {
+    elements[t] = null;
+  }
+
+  contextMenu.style.display = 'none';
+  renderList();
+});
+
+document.addEventListener('click', e => {
+  if (!contextMenu.contains(e.target)) contextMenu.style.display = 'none';
+});
+
+// --- Render list ---
+function renderList() {
+  listEl.innerHTML = '';
+  const keys = ['grid','play_button','increase_button','decrease_button','win_label'];
+  keys.forEach(k => {
+    const row = document.createElement('div');
+    row.className = 'listItem';
+
+    const left = document.createElement('div');
+    left.textContent = k.replace('_',' ');
+
+    const right = document.createElement('div');
+    if (elements[k]) {
+      const d = getPos(elements[k]);
+      right.textContent = `x:${d.x} y:${d.y} w:${d.width} h:${d.height}`;
+    } else {
+      right.textContent = '—';
+    }
+
+    row.appendChild(left);
+    row.appendChild(right);
+    listEl.appendChild(row);
+  });
+
+  const labTitle = document.createElement('div');
+  labTitle.style.fontWeight = '800';
+  labTitle.style.marginTop = '6px';
+  labTitle.textContent = 'Labels';
+  listEl.appendChild(labTitle);
+
+  elements.labels.forEach((l, i) => {
+    const row = document.createElement('div');
+    row.className = 'listItem';
+
+    const left = document.createElement('div');
+    left.textContent = `Label ${i + 1}`;
+
+    const d = getPos(l);
+    const right = document.createElement('div');
+    right.textContent = `x:${d.x} y:${d.y} w:${d.width} h:${d.height}`;
+
+    row.appendChild(left);
+    row.appendChild(right);
+    listEl.appendChild(row);
+  });
+}
+
+// --- Buttons ---
+document.getElementById('addGrid').addEventListener('click', () => create('grid'));
+document.getElementById('addPlay').addEventListener('click', () => create('play_button'));
+document.getElementById('addIncrease').addEventListener('click', () => create('increase_button'));
+document.getElementById('addDecrease').addEventListener('click', () => create('decrease_button'));
+document.getElementById('addWin').addEventListener('click', () => create('win_label'));
+document.getElementById('addLabel').addEventListener('click', () => create('label'));
+
+// --- Mouse move for handles ---
+canvas.addEventListener('mousemove', e => {
+  const els = [...canvas.querySelectorAll('.element')];
+  els.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const hx = rect.right - 12,
+          hy = rect.bottom - 12;
+    const mx = e.clientX,
+          my = e.clientY;
+
+    const overHandle = mx >= hx - 12 && mx <= hx + 12 && my >= hy - 12 && my <= hy + 12;
+    if (overHandle) showBadge(el);
+    else if (!el.matches(':hover') && !el._resizing) hideBadge(el);
+  });
+});
+
+// --- Send payload ---
+document.getElementById('send').addEventListener('click', () => {
+  const payload = {};
+  const c = canvas.getBoundingClientRect();
+
+  function to1024(v, axis) {
+    return Math.round(v / (axis === 0 ? c.width : c.height) * 1024);
+  }
+
+  if (elements.grid) {
+    const d = getPos(elements.grid);
+    payload.grid = {
+      x: to1024(d.x,0), y: to1024(d.y,1),
+      width: to1024(d.width,0), height: to1024(d.height,1)
+    };
+  }
+
+  if (elements.play_button) {
+    const d = getPos(elements.play_button);
+    payload.play_button = {
+      x: to1024(d.x,0), y: to1024(d.y,1),
+      width: to1024(d.width,0), height: to1024(d.height,1)
+    };
+  }
+
+  if (elements.increase_button) {
+    const d = getPos(elements.increase_button);
+    payload.increase_button = {
+      x: to1024(d.x,0), y: to1024(d.y,1),
+      width: to1024(d.width,0), height: to1024(d.height,1)
+    };
+  }
+
+  if (elements.decrease_button) {
+    const d = getPos(elements.decrease_button);
+    payload.decrease_button = {
+      x: to1024(d.x,0), y: to1024(d.y,1),
+      width: to1024(d.width,0), height: to1024(d.height,1)
+    };
+  }
+
+  if (elements.win_label) {
+    const d = getPos(elements.win_label);
+    payload.win_label = {
+      x: to1024(d.x,0), y: to1024(d.y,1),
+      width: to1024(d.width,0), height: to1024(d.height,1)
+    };
+  }
+
+  payload.Labels = elements.labels.map(l => {
+    const d = getPos(l);
+    return {
+      x: to1024(d.x,0), y: to1024(d.y,1),
+      width: to1024(d.width,0), height: to1024(d.height,1),
+      text: l.firstElementChild ? l.firstElementChild.textContent : ''
+    };
+  });
+
+  payload.message = document.getElementById('msgInput').value;
+  console.log(JSON.stringify(payload, null, 2));
+});
+
+window.addEventListener('resize', renderList);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
 </script>
 </body>
 </html>
