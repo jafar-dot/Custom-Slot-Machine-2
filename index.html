@@ -34,9 +34,7 @@ textarea{width:100%;height:60px;padding:6px;font-size:14px;border:1px solid #374
   <button id="addDecrease">Insert -</button>
   <button id="addWin">Insert Win</button>
 </div>
-<div id="canvas">
-  <div class="grid-bg"></div>
-</div>
+<div id="canvas"><div class="grid-bg"></div></div>
 <div id="infoArea">
   <textarea id="msgInput" placeholder="Type prompt..."></textarea>
   <button id="send">Send</button>
@@ -54,7 +52,6 @@ const contextMenu=document.getElementById('contextMenu')
 const inputs={x:document.getElementById('xVal'),y:document.getElementById('yVal'),w:document.getElementById('wVal'),h:document.getElementById('hVal')}
 let elements={grid:null,play_button:null,increase_button:null,decrease_button:null,win_label:null}
 let currentEl=null
-
 function createElement(type){
   if(elements[type])return
   const el=document.createElement('div')
@@ -75,28 +72,23 @@ function createElement(type){
   makeResizable(el,handle,label)
   el.oncontextmenu=e=>{e.preventDefault();currentEl=el;showContextMenu(e.pageX,e.pageY)}
 }
-
 function makeDraggable(el){
   let startX,startY,origX,origY
   el.addEventListener('mousedown',e=>{
     if(e.target.classList.contains('handle'))return
-    startX=e.clientX
-    startY=e.clientY
+    startX=e.clientX;startY=e.clientY
     const rect=el.getBoundingClientRect(),p=canvas.getBoundingClientRect()
-    origX=rect.left-p.left
-    origY=rect.top-p.top
+    origX=rect.left-p.left;origY=rect.top-p.top
     function move(ev){
       let newX=Math.max(0,Math.min(origX+ev.clientX-startX,canvas.clientWidth-el.offsetWidth))
       let newY=Math.max(0,Math.min(origY+ev.clientY-startY,canvas.clientHeight-el.offsetHeight))
-      el.style.left=newX+'px'
-      el.style.top=newY+'px'
+      el.style.left=newX+'px';el.style.top=newY+'px'
     }
     function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up)}
     document.addEventListener('mousemove',move)
     document.addEventListener('mouseup',up)
   })
 }
-
 function makeResizable(el,handle,label){
   let startX,startY,startW,startH
   handle.addEventListener('mouseover',()=>{updateLabel(el,label);label.style.display='block'})
@@ -108,8 +100,7 @@ function makeResizable(el,handle,label){
     function move(ev){
       let newW=Math.max(30,startW+ev.clientX-startX)
       let newH=Math.max(30,startH+ev.clientY-startY)
-      el.style.width=newW+'px'
-      el.style.height=newH+'px'
+      el.style.width=newW+'px';el.style.height=newH+'px'
       updateLabel(el,label)
     }
     function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up)}
@@ -117,12 +108,10 @@ function makeResizable(el,handle,label){
     document.addEventListener('mouseup',up)
   })
 }
-
 function updateLabel(el,label){
   const r=el.getBoundingClientRect(),p=canvas.getBoundingClientRect()
   label.textContent=`x=${r.left-p.left|0},y=${r.top-p.top|0},w=${r.width|0},h=${r.height|0}`
 }
-
 function showContextMenu(x,y){
   const r=currentEl.getBoundingClientRect(),p=canvas.getBoundingClientRect()
   inputs.x.value=r.left-p.left|0
@@ -133,9 +122,7 @@ function showContextMenu(x,y){
   contextMenu.style.left=x+'px'
   contextMenu.style.top=y+'px'
 }
-
 document.addEventListener('click',e=>{if(!contextMenu.contains(e.target))contextMenu.style.display='none'})
-
 document.getElementById('applyVals').onclick=()=>{
   if(!currentEl)return
   currentEl.style.left=inputs.x.value+'px'
@@ -144,19 +131,17 @@ document.getElementById('applyVals').onclick=()=>{
   currentEl.style.height=inputs.h.value+'px'
   contextMenu.style.display='none'
 }
-
 document.getElementById('addGrid').onclick=()=>createElement('grid')
 document.getElementById('addPlay').onclick=()=>createElement('play_button')
 document.getElementById('addIncrease').onclick=()=>createElement('increase_button')
 document.getElementById('addDecrease').onclick=()=>createElement('decrease_button')
 document.getElementById('addWin').onclick=()=>createElement('win_label')
-
 document.getElementById('send').onclick=()=>{
   const msg=document.getElementById('msgInput').value
   const data={message:msg}
   for(let k in elements){
     if(elements[k]){
-      const r=elements[k].getBoundingClientRect(),p=canvas.getBoundingClientRect()
+      const r=elements[k].getBoundingClientRect(),p=canvas.getBoundingClientRect();
       data[k]={x:r.left-p.left|0,y:r.top-p.top|0,width:r.width|0,height:r.height|0}
     }
   }
