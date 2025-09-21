@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Custom Slot Machine Editor</title>
+<style>
+body{
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#f0f0f0;
+}
+#toolbar{
+  display:flex;
+  justify-content:center;
+  padding:12px;
+  background:rgba(0,0,0,0.5);
+  border-bottom:2px solid #444;
+  flex-shrink:0;
+  backdrop-filter:blur(6px);
+}
+button{
+  background:linear-gradient(135deg,#4facfe,#00f2fe);
+  color:white;
+  border:none;
+  padding:12px 22px;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  transition:transform 0.2s ease, background 0.3s ease;
+  margin:0 6px;
+}
+button:hover{
+  background:linear-gradient(135deg,#43e97b,#38f9d7);
+  transform:translateY(-2px);
+}
+button:active{
+  transform:translateY(1px);
+}
+#canvas{
+  flex:1;
+  width:100%;
+  max-width:1024px;
+  aspect-ratio:1/1;
+  background:linear-gradient(145deg,#1c1c1c,#292929);
+  border-radius:16px;
+  border:2px solid #444;
+  box-shadow:0 8px 20px rgba(0,0,0,0.6);
+  position:relative;
+  overflow:hidden;
+  margin:16px auto;
+}
+.element{
+  position:absolute;
+  border-radius:12px;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+  font-size:12px;
+  font-weight:bold;
+  user-select:none;
+}
+.grid{background:rgba(0,180,255,0.8);border:2px solid #fff;}
+.play_button{background:rgba(255,100,100,0.8);border:2px solid #fff;}
+.increase_button{background:rgba(0,255,0,0.8);border:2px solid #fff;}
+.decrease_button{background:rgba(255,255,0,0.8);border:2px solid #fff;}
+.win_label{background:rgba(200,0,200,0.8);border:2px solid #fff;}
+.handle{
+  width:14px;
+  height:14px;
+  background:#ffcc00;
+  border:2px solid #fff;
+  border-radius:50%;
+  position:absolute;
+  bottom:-8px;
+  right:-8px;
+  cursor:se-resize;
+}
+#infoArea{
+  max-width:1024px;
+  margin:0 auto;
+  padding:8px;
+  background:rgba(0,0,0,0.7);
+  border-top:2px solid #444;
+  font-size:12px;
+  display:flex;
+  flex-direction:column;
+}
+textarea{
+  width:100%;
+  height:60px;
+  padding:8px;
+  font-size:15px;
+  border:none;
+  border-radius:8px;
+  margin-bottom:8px;
+  background:#1e1e1e;
+  color:#fff;
+}
+textarea:focus{outline:2px solid #4facfe;}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button id="addGrid">Insert Grid</button>
+  <button id="addPlay">Insert Play Button</button>
+  <button id="addIncrease">Insert + Button</button>
+  <button id="addDecrease">Insert - Button</button>
+  <button id="addWin">Insert Win Label</button>
+</div>
+<div id="canvas"></div>
+<div id="infoArea">
+  <textarea id="msgInput" placeholder="Type prompt..."></textarea>
+  <button id="send">Send</button>
+  <div id="elementInfo"></div>
+</div>
+<script>
+const canvas=document.getElementById('canvas')
+const elementInfo=document.getElementById('elementInfo')
+let elements={grid:null,play_button:null,increase_button:null,decrease_button:null,win_label:null}
+
+function createElement(type){
+  if(type==='grid'&&elements.grid)return
+  if(type==='play_button'&&elements.play_button)return
+  if(type==='increase_button'&&elements.increase_button)return
+  if(type==='decrease_button'&&elements.decrease_button)return
+  if(type==='win_label'&&elements.win_label)return
+  const el=document.createElement('div')
+  el.classList.add('element',type)
+  el.style.width='100px'
+  el.style.height='60px'
+  el.style.left='50px'
+  el.style.top='50px'
+  const handle=document.createElement('div')
+  handle.classList.add('handle')
+  el.appendChild(handle)
+  canvas.appendChild(el)
+  elements[type]=el
+  makeDraggable(el)
+  makeResizable(el,handle)
+  el.oncontextmenu=e=>{e.preventDefault();el.remove();elements[type]=null;updateInfo()}
+  updateInfo()
+}
+
+function makeDraggable(el){
+  let startX,startY,origX,origY
+  el.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('handle'))return
+    startX=e.clientX
+    startY=e.clientY
+    const rect=el.getBoundingClientRect()
+    const parent=canvas.getBoundingClientRect()
+    origX=rect.left-parent.left
+    origY=rect.top-parent.top
+    function moveHandler(ev){
+      let newX=Math.max(0,Math.min(origX+ev.clientX-startX,canvas.clientWidth-el.offsetWidth))
+      let newY=Math.max(0,Math.min(origY+ev.clientY-startY,canvas.clientHeight-el.offsetHeight))
+      el.style.left=newX+'px'
+      el.style.top=newY+'px'
+      updateInfo()
+    }
+    function upHandler(){
+      document.removeEventListener('mousemove',moveHandler)
+      document.removeEventListener('mouseup',upHandler)
+    }
+    document.addEventListener('mousemove',moveHandler)
+    document.addEventListener('mouseup',upHandler)
+  })
+}
+
+function makeResizable(el,handle){
+  let startX,startY,startW,startH
+  handle.addEventListener('mousedown',e=>{
+    e.stopPropagation()
+    startX=e.clientX
+    startY=e.clientY
+    startW=el.offsetWidth
+    startH=el.offsetHeight
+    function moveHandler(ev){
+      let newW=Math.max(20,startW+ev.clientX-startX)
+      let newH=Math.max(20,startH+ev.clientY-startY)
+      newW=Math.min(newW,canvas.clientWidth-el.offsetLeft)
+      newH=Math.min(newH,canvas.clientHeight-el.offsetTop)
+      el.style.width=newW+'px'
+      el.style.height=newH+'px'
+      updateInfo()
+    }
+    function upHandler(){document.removeEventListener('mousemove',moveHandler);document.removeEventListener('mouseup',upHandler)}
+    document.addEventListener('mousemove',moveHandler)
+    document.addEventListener('mouseup',upHandler)
+  })
+}
+
+function updateInfo(){
+  let info=''
+  for(let key in elements){
+    if(elements[key]){
+      const r=elements[key].getBoundingClientRect()
+      const p=canvas.getBoundingClientRect()
+      info+=key+': x='+(r.left-p.left|0)+', y='+(r.top-p.top|0)+', w='+(r.width|0)+', h='+(r.height|0)+'\n'
+    }
+  }
+  elementInfo.textContent=info
+}
+
+document.getElementById('addGrid').onclick=()=>createElement('grid')
+document.getElementById('addPlay').onclick=()=>createElement('play_button')
+document.getElementById('addIncrease').onclick=()=>createElement('increase_button')
+document.getElementById('addDecrease').onclick=()=>createElement('decrease_button')
+document.getElementById('addWin').onclick=()=>createElement('win_label')
+
+document.getElementById('send').onclick=()=>{
+  const msg=document.getElementById('msgInput').value
+  const data={message:msg}
+  for(let key in elements){
+    if(elements[key]){
+      const r=elements[key].getBoundingClientRect()
+      const p=canvas.getBoundingClientRect()
+      data[key]={x:r.left-p.left|0,y:r.top-p.top|0,width:r.width|0,height:r.height|0}
+    }
+  }
+  console.log(JSON.stringify(data))
+}
+</script>
+</body>
+</html>
