@@ -157,62 +157,7 @@ const elements = {
   decrease_level: null,  
   win_label: null,
   labels: []
-};
-
-
-
-
-
-let clipboard = null;
-
-canvas.addEventListener('contextmenu', e => {
-  e.preventDefault();
-  const target = e.target.closest('.element');
-  if (!target || target.dataset.type !== 'label') return;
-  current = target;
-  openContext(e.pageX, e.pageY);
-});
-
-document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 'v' && clipboard) {
-    const clone = clipboard.cloneNode(true);
-    clone.style.left = '50%';
-    clone.style.top = '50%';
-    clone.style.transform = 'translate(-50%, -50%)';
-    canvas.appendChild(clone);
-    elements.labels.push(clone);
-    attach(clone, clone.querySelector('.handle'));
-  }
-});
-
-document.getElementById('btnApply').addEventListener('click', () => {
-  if (!current) return;
-  const nx = Number(ctxX.value) || 0, ny = Number(ctxY.value) || 0, nw = Math.max(8, Number(ctxW.value) || 8), nh = Math.max(8, Number(ctxH.value) || 8);
-  const c = canvas.getBoundingClientRect();
-  if (nx + nw > c.width || ny + nh > c.height) { alert("Values exceed 1024 boundary"); return; }
-  current.style.left = nx + 'px';
-  current.style.top = ny + 'px';
-  current.style.width = nw + 'px';
-  current.style.height = nh + 'px';
-  if (current.dataset.type === 'label') current.firstElementChild.textContent = ctxText.value;
-  contextMenu.style.display = 'none';
-  hideBadge(current);
-  clipboard = current.cloneNode(true);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
+};  
 let current = null;
 function create(type) {
   if (type !== 'label' && elements[type]) return;
@@ -328,13 +273,10 @@ function startResize(e) {
     el.style.height = nh + 'px';
     if (el._badge) updateBadge(el);
   }
-
   function up() { el._resizing = false; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
-
   document.addEventListener('mousemove', move);
   document.addEventListener('mouseup', up);
 }
-
 function openContext(pageX, pageY) {
   const d = getPos(current);
   ctxX.value = d.x; ctxY.value = d.y; ctxW.value = d.width; ctxH.value = d.height;
@@ -343,8 +285,6 @@ function openContext(pageX, pageY) {
   contextMenu.style.left = pageX + 'px'; contextMenu.style.top = pageY + 'px';
   contextMenu.style.display = 'flex';
 }
-
-// ======= Context Menu =======
 document.getElementById('btnApply').addEventListener('click', () => {
   if (!current) return;
   const nx = Number(ctxX.value)||0, ny = Number(ctxY.value)||0, nw = Math.max(8,Number(ctxW.value)||8), nh = Math.max(8,Number(ctxH.value)||8);
@@ -365,7 +305,7 @@ document.getElementById('btnDelete').addEventListener('click', () => {
 
 document.addEventListener('click', e=>{if(!contextMenu.contains(e.target)) contextMenu.style.display='none';});
 
-// ======= Buttons =======
+
 document.getElementById('addGrid').addEventListener('click', ()=>create('grid'));
 document.querySelectorAll('.dropdown-content button').forEach(b => b.addEventListener('click', ()=>create(b.dataset.type)));
 document.getElementById('addWin').addEventListener('click', ()=>create('win_label'));
@@ -379,7 +319,6 @@ canvas.addEventListener('mousemove', e=>{
   });
 });
 
-// ======= Send JSON & track progress =======
 function collectPayload() {
   const payload = {};
   const c = canvas.getBoundingClientRect();
@@ -419,7 +358,6 @@ sendButton.addEventListener('click', ()=>{
   .catch(err=>{ console.error(err); document.getElementById("waitMessage").style.display="none"; });
 });
 
-// ======= Periodic progress check =======
 function checkStatus(){
   fetch(`${url}/get_status`, {
     method:"POST",
@@ -450,9 +388,5 @@ function checkStatus(){
 }
 setInterval(checkStatus,1000);
 </script>
-
-
-
-  
 </body>
 </html>
