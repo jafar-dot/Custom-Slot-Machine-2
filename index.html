@@ -88,8 +88,8 @@
             <button data-type="auto_play_button">Auto Play Button</button>
             <button data-type="max_bet_button">Max Bet Button</button>
             <button data-type="min_bet_button">Min Bet Button</button>
-            <button data-type="increase_level">Get Free Spins Button</button>
-            <button data-type="decrease_level">Get Free Spins Button</button>            
+            <button data-type="increase_level">Increase_level Button</button>
+            <button data-type="decrease_level">Decrease_level Button</button>            
           </div>
         </div>
         <button class="btn" id="addWin">Insert Win</button>
@@ -340,7 +340,7 @@ function collectPayload() {
   payload.message = document.getElementById('msgInput').value;
   return payload;
 }
-
+create(grid);
 sendButton.addEventListener('click', ()=>{
   const payload = collectPayload();
   document.getElementById("waitMessage").style.display="block";
