@@ -23,7 +23,7 @@
     .panel{background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);color:#93a4b3;width:100%}
     .textarea{width:100%;height:100px;padding:8px;border-radius:8px;border:none;background:#07182a;color:#dff8ef;resize:none}
     .sendRow{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
-    .element{position:absolute;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#07121a;user-select:none;box-shadow:0 8px 20px rgba(2,6,23,0.6); font-size: calc(0.4 * min(var(--w, 100px), var(--h, 56px)));}
+    .element{position:absolute;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#07121a;user-select:none;box-shadow:0 8px 20px rgba(2,6,23,0.6); overflow: hidden;text-overflow: ellipsis;white-space: nowrap;text-align: center;}
     .grid{background:linear-gradient(180deg,rgba(37,99,235,0.9),rgba(96,165,250,0.85));color:#fff}
     .play_button{background:linear-gradient(90deg,#ef4444,#fb7185);color:#fff}
     .increase_bet{background:linear-gradient(90deg,#10b981,#34d399);color:#04221a}
@@ -163,8 +163,9 @@ const elements = {
 function updateFontSize(el) {
   const w = el.offsetWidth;
   const h = el.offsetHeight;
-  const size = Math.min(w, h) * 0.35; // 35% 
+  let size = Math.min(h * 0.5, w / el.textContent.length * 1.8);
   el.style.fontSize = size + "px";
+  el.style.lineHeight = h + "px";  
 }
 
   
