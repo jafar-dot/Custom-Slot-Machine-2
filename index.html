@@ -341,80 +341,79 @@ canvas.addEventListener('mousemove', e=>{
 
 
 
+
+
+
+
+
 let clipboardLabel = null;
-const btnCopy = document.createElement('button');
-btnCopy.id = 'btnCopy';
-btnCopy.textContent = 'Copy';
-btnCopy.style.display = 'none';
-btnCopy.style.padding = '8px 10px';
-btnCopy.style.borderRadius = '6px';
-btnCopy.style.border = 'none';
-btnCopy.style.background = 'linear-gradient(90deg,#6ee7b7,#7dd3fc)';
-btnCopy.style.color = '#04221a';
-btnCopy.style.fontWeight = '800';
-btnCopy.style.cursor = 'pointer';
-const btnPaste = document.createElement('button');
-btnPaste.id = 'btnPaste';
-btnPaste.textContent = 'Paste';
-btnPaste.style.display = 'none';
-btnPaste.style.padding = '8px 10px';
-btnPaste.style.borderRadius = '6px';
-btnPaste.style.border = 'none';
-btnPaste.style.background = 'linear-gradient(90deg,#6ee7b7,#7dd3fc)';
-btnPaste.style.color = '#04221a';
-btnPaste.style.fontWeight = '800';
-btnPaste.style.cursor = 'pointer';
-const contextMenu = document.getElementById('contextMenu');
-contextMenu.appendChild(btnCopy);
-contextMenu.appendChild(btnPaste);
-btnCopy.addEventListener('click', () => {
-  if (!current || current.dataset.type !== 'label') return;
-  const d = getPos(current);
-  clipboardLabel = { width: d.width, height: d.height, text: current.firstElementChild ? current.firstElementChild.textContent : '' };
-  contextMenu.style.display = 'none';
-});
-btnPaste.addEventListener('click', () => {
-  if (!clipboardLabel) return;
-  const el = document.createElement('div');
-  el.className = 'element label';
-  el.style.width = clipboardLabel.width + 'px';
-  el.style.height = clipboardLabel.height + 'px';
-  el.style.left = '32px';
-  el.style.top = '32px';
-  el.dataset.type = 'label';
-  const span = document.createElement('span');
-  span.textContent = clipboardLabel.text;
-  el.appendChild(span);
-  const handle = document.createElement('div');
-  handle.className = 'handle';
-  el.appendChild(handle);
-  canvas.appendChild(el);
-  elements.labels.push(el);
-  attach(el, handle);
-  contextMenu.style.display = 'none';
-});
 canvas.addEventListener('contextmenu', e => {
-  if (e.target === canvas) {
-    e.preventDefault();
-    current = null;
-    btnCopy.style.display = 'none';
-    btnPaste.style.display = clipboardLabel ? 'block' : 'none';
-    contextMenu.style.left = e.pageX + 'px';
-    contextMenu.style.top = e.pageY + 'px';
-    contextMenu.style.display = 'flex';
+  e.preventDefault();
+  const el = e.target.closest('.element.label');
+  current = el || null;
+  const contextMenu = document.getElementById('contextMenu');
+  contextMenu.innerHTML = '';
+
+  if(current){
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = 'Delete';
+    btnDelete.onclick = () => {
+      current.remove();
+      contextMenu.style.display = 'none';
+    };
+
+    const btnApply = document.createElement('button');
+    btnApply.textContent = 'Apply';
+    btnApply.onclick = () => {
+      contextMenu.style.display = 'none';
+    };
+
+    const btnCopy = document.createElement('button');
+    btnCopy.textContent = 'Copy';
+    btnCopy.onclick = () => {
+      const d = current.getBoundingClientRect();
+      clipboardLabel = { width: d.width, height: d.height, text: current.textContent };
+      contextMenu.style.display = 'none';
+    };
+
+    contextMenu.appendChild(btnDelete);
+    contextMenu.appendChild(btnApply);
+    contextMenu.appendChild(btnCopy);
+
+  } else if(clipboardLabel){
+    const btnPaste = document.createElement('button');
+    btnPaste.textContent = 'Paste';
+    btnPaste.onclick = () => {
+      const newEl = document.createElement('div');
+      newEl.className = 'element label';
+      newEl.style.width = clipboardLabel.width + 'px';
+      newEl.style.height = clipboardLabel.height + 'px';
+      newEl.style.left = e.offsetX + 'px';
+      newEl.style.top = e.offsetY + 'px';
+      newEl.dataset.type = 'label';
+      newEl.textContent = clipboardLabel.text;
+
+      const handle = document.createElement('div');
+      handle.className = 'handle';
+      newEl.appendChild(handle);
+
+      canvas.appendChild(newEl);
+      attach(newEl, handle);
+      contextMenu.style.display = 'none';
+    };
+
+    contextMenu.appendChild(btnPaste);
   }
+
+  contextMenu.style.left = e.pageX + 'px';
+  contextMenu.style.top = e.pageY + 'px';
+  contextMenu.style.display = 'flex';
 });
-const oldOpenContext = openContext;
-openContext = (pageX,pageY) => {
-  oldOpenContext(pageX,pageY);
-  if(current && current.dataset.type==='label'){
-    btnCopy.style.display='block';
-    btnPaste.style.display='none';
-  } else {
-    btnCopy.style.display='none';
-    btnPaste.style.display='none';
-  }
-};
+
+document.addEventListener('click', e => {
+  const contextMenu = document.getElementById('contextMenu');
+  if(!contextMenu.contains(e.target)) contextMenu.style.display = 'none';
+});
 
 
 
@@ -422,8 +421,7 @@ openContext = (pageX,pageY) => {
 
 
 
-
-
+  
 
 
 
