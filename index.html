@@ -133,45 +133,277 @@
     </div>
   </div>
 <script>
-const canvas=document.getElementById('canvas');
-const contextMenu=document.getElementById('contextMenu');
-const url="https://tamica-inventoriable-kimbra.ngrok-free.app/";
-const session_id="user_"+Math.floor(Math.random()*1000000);
-const sendButton=document.getElementById('send');
-const ctxX=document.getElementById('ctxX'),
-      ctxY=document.getElementById('ctxY'),
-      ctxW=document.getElementById('ctxW'),
-      ctxH=document.getElementById('ctxH'),
-      ctxText=document.getElementById('ctxText'),
-      textRow=document.getElementById('textRow');
-const elements={grid:null,play_button:null,increase_bet:null,decrease_bet:null,auto_play_button:null,max_bet_button:null,min_bet_button:null,increase_level:null,decrease_level:null,win_label:null,labels:[]};
-function updateFontSize(el){const w=el.offsetWidth;const h=el.offsetHeight;let size=Math.min(h*0.5,w/(el.textContent.length||1)*1.8);el.style.fontSize=size+"px";el.style.lineHeight=h+"px";}
-let current=null;
-function create(type){if(type!=='label'&&elements[type])return;const el=document.createElement('div');el.className='element '+(type==='label'?'label':type);el.style.width='120px';el.style.height='56px';el.style.left='32px';el.style.top='32px';el.dataset.type=type;if(type==='label'){const span=document.createElement('span');span.contentEditable=true;span.textContent='';el.appendChild(span);}else{el.textContent=type.replace(/_/g,' ').toUpperCase();updateFontSize(el);}const handle=document.createElement('div');handle.className='handle';el.appendChild(handle);canvas.appendChild(el);if(type==='label')elements.labels.push(el);else elements[type]=el;attach(el,handle);}
-function attach(el,handle){el.addEventListener('mousedown',startDrag);handle.addEventListener('mousedown',startResize);handle.addEventListener('mouseenter',()=>showBadge(el));handle.addEventListener('mouseleave',()=>hideBadge(el));el.addEventListener('contextmenu',e=>{e.preventDefault();current=el;openContext(e.pageX,e.pageY);});}
-function getPos(el){const r=el.getBoundingClientRect(),p=canvas.getBoundingClientRect();return{x:Math.round(r.left-p.left),y:Math.round(r.top-p.top),width:Math.round(r.width),height:Math.round(r.height)};}
-function showBadge(el){if(el._badge)return updateBadge(el);const b=document.createElement('div');b.className='badge';el._badge=b;el.appendChild(b);updateBadge(el);}
-function updateBadge(el){const d=getPos(el);el._badge.textContent=`x=${d.x} y=${d.y} w=${d.width} h=${d.height}`;}
-function hideBadge(el){if(el._badge){el._badge.remove();el._badge=null;}}
-function startDrag(e){if(e.target.classList.contains('handle'))return;e.preventDefault();const el=this;const rect=el.getBoundingClientRect(),p=canvas.getBoundingClientRect();const startX=e.clientX,startY=e.clientY;const origX=rect.left-p.left,origY=rect.top-p.top;function move(ev){const nx=Math.max(0,Math.min(origX+ev.clientX-startX,canvas.clientWidth-el.offsetWidth));const ny=Math.max(0,Math.min(origY+ev.clientY-startY,canvas.clientHeight-el.offsetHeight));el.style.left=nx+'px';el.style.top=ny+'px';if(el._badge)updateBadge(el);}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);}
-function startResize(e){e.stopPropagation();e.preventDefault();const el=this.parentElement;el._resizing=true;const startX=e.clientX,startY=e.clientY,startW=el.offsetWidth,startH=el.offsetHeight;function move(ev){let rawLeft=parseInt(el.style.left)||el.offsetLeft;let rawTop=parseInt(el.style.top)||el.offsetTop;let nw=Math.max(24,Math.min(startW+ev.clientX-startX,canvas.clientWidth-rawLeft));let nh=Math.max(24,Math.min(startH+ev.clientY-startY,canvas.clientHeight-rawTop));el.style.width=nw+'px';el.style.height=nh+'px';updateFontSize(el);if(el._badge)updateBadge(el);}function up(){el._resizing=false;document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);}
-function openContext(pageX,pageY){const d=getPos(current);ctxX.value=d.x;ctxY.value=d.y;ctxW.value=d.width;ctxH.value=d.height;textRow.style.display=current.dataset.type==='label'?'flex':'none';ctxText.value=current.dataset.type==='label'?current.firstElementChild.textContent.trim():'';contextMenu.style.left=pageX+'px';contextMenu.style.top=pageY+'px';contextMenu.style.display='flex';}
-document.getElementById('btnApply').addEventListener('click',()=>{if(!current)return;const nx=Number(ctxX.value)||0,ny=Number(ctxY.value)||0,nw=Math.max(8,Number(ctxW.value)||8),nh=Math.max(8,Number(ctxH.value)||8);const c=canvas.getBoundingClientRect();if(nx+nw>c.width||ny+nh>c.height)return;current.style.left=nx+'px';current.style.top=ny+'px';current.style.width=nw+'px';current.style.height=nh+'px';if(current.dataset.type==='label')current.firstElementChild.textContent=ctxText.value;contextMenu.style.display='none';hideBadge(current);});
-document.getElementById('btnDelete').addEventListener('click',()=>{if(!current)return;const t=current.dataset.type;current.remove();if(t==='label'){const i=elements.labels.indexOf(current);if(i>-1)elements.labels.splice(i,1);}else elements[t]=null;contextMenu.style.display='none';});
-document.addEventListener('click',e=>{if(!contextMenu.contains(e.target))contextMenu.style.display='none';});
-document.getElementById('addGrid').addEventListener('click',()=>create('grid'));
-document.querySelectorAll('.dropdown-content button').forEach(b=>b.addEventListener('click',()=>create(b.dataset.type)));
-document.getElementById('addWin').addEventListener('click',()=>create('win_label'));
-document.getElementById('addLabel').addEventListener('click',()=>create('label'));
-canvas.addEventListener('mousemove',e=>{[...canvas.querySelectorAll('.element')].forEach(el=>{const rect=el.getBoundingClientRect(),hx=rect.right-12,hy=rect.bottom-12;const overHandle=e.clientX>=hx-12&&e.clientX<=hx+12&&e.clientY>=hy-12&&e.clientY<=hy+12;if(overHandle)showBadge(el);else if(!el.matches(':hover')&&!el._resizing)hideBadge(el);});});
-let clipboardLabel=null;
-canvas.addEventListener('contextmenu',e=>{e.preventDefault();const el=e.target.closest('.element.label');current=el||null;const contextMenu=document.getElementById('contextMenu');contextMenu.innerHTML='';if(current){const btnDelete=document.createElement('button');btnDelete.textContent='Delete';btnDelete.onclick=()=>{current.remove();contextMenu.style.display='none';};const btnApply=document.createElement('button');btnApply.textContent='Apply';btnApply.onclick=()=>{const input=document.getElementById('ctxText');if(input&&current.firstElementChild)current.firstElementChild.textContent=input.value;contextMenu.style.display='none';};const btnCopy=document.createElement('button');btnCopy.textContent='Copy';btnCopy.onclick=()=>{const d=current.getBoundingClientRect();clipboardLabel={width:d.width,height:d.height,text:current.firstElementChild?current.firstElementChild.textContent:''};contextMenu.style.display='none';};contextMenu.appendChild(btnDelete);contextMenu.appendChild(btnApply);contextMenu.appendChild(btnCopy);if(!current.firstElementChild){const span=document.createElement('span');span.contentEditable=true;span.textContent='';current.appendChild(span);}ctxText.value=current.firstElementChild.textContent;textRow.style.display='flex';}else{textRow.style.display='none';if(clipboardLabel){const btnPaste=document.createElement('button');btnPaste.textContent='Paste';btnPaste.onclick=()=>{const newEl=document.createElement('div');newEl.className='element label';newEl.style.width=clipboardLabel.width+'px';newEl.style.height=clipboardLabel.height+'px';newEl.style.left=e.offsetX+'px';newEl.style.top=e.offsetY+'px';newEl.dataset.type='label';const span=document.createElement('span');span.contentEditable=true;span.textContent=clipboardLabel.text;newEl.appendChild(span);const handle=document.createElement('div');handle.className='handle';newEl.appendChild(handle);canvas.appendChild(newEl);elements.labels.push(newEl);attach(newEl,handle);contextMenu.style.display='none';};contextMenu.appendChild(btnPaste);}}contextMenu.style.left=e.pageX+'px';contextMenu.style.top=e.pageY+'px';contextMenu.style.display='flex';});
-document.addEventListener('click',e=>{const contextMenu=document.getElementById('contextMenu');if(!contextMenu.contains(e.target))contextMenu.style.display='none';});
-function collectPayload(){const payload={};const c=canvas.getBoundingClientRect();function to1024(v,axis){return Math.round(v/(axis===0?c.width:c.height)*1024);}for(const k in elements){if(k==='labels')continue;if(elements[k]){const d=getPos(elements[k]);payload[k]={x:to1024(d.x,0),y:to1024(d.y,1),width:to1024(d.width,0),height:to1024(d.height,1)};}}payload.Labels=elements.labels.map(l=>{const d=getPos(l);return{x:to1024(d.x,0),y:to1024(d.y,1),width:to1024(d.width,0),height:to1024(d.height,1),text:l.firstElementChild?l.firstElementChild.textContent:''};});payload.message=document.getElementById('msgInput').value;return payload;}
-sendButton.addEventListener('click',()=>{const payload=collectPayload();document.getElementById("waitMessage").style.display="block";fetch(`${url}/receive_message`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id,rects:payload})}).then(res=>res.json()).then(data=>{document.getElementById("waitMessage").style.display="none";if(data.status==="True")console.log("Server reply:",data.reply);else console.error("Error:",data.reply);}).catch(err=>{console.error(err);document.getElementById("waitMessage").style.display="none";});});
-function checkStatus(){fetch(`${url}/get_status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id})}).then(res=>res.json()).then(data=>{const percent=data.process_percent||0;const progressContainer=document.getElementById("progressContainer");const progressFill=document.getElementById("progressFill");const links=document.getElementById("links");if(percent>0&&percent<100){progressContainer.style.display="block";links.style.display="none";progressFill.style.width=percent+"%";sendButton.disabled=true;}else if(percent===100){progressFill.style.width="100%";progressContainer.style.display="block";links.style.display="block";document.getElementById("playLink").href=url+data.game_link;document.getElementById("downloadLink").href=url+data.download_link;const iframe=document.getElementById("gamePreview");if(iframe)iframe.src=url+data.game_link;sendButton.disabled=false;}else{progressContainer.style.display="none";links.style.display="none";progressFill.style.width="0%";}}).catch(err=>console.error("Status error:",err));}
+const canvas = document.getElementById('canvas');
+const contextMenu = document.getElementById('contextMenu');
+const url = "https://tamica-inventoriable-kimbra.ngrok-free.app";
+const session_id = "user_" + Math.floor(Math.random() * 1000000);
+const sendButton = document.getElementById('send');
+
+const ctxX = document.getElementById('ctxX'),
+      ctxY = document.getElementById('ctxY'),
+      ctxW = document.getElementById('ctxW'),
+      ctxH = document.getElementById('ctxH'),
+      ctxText = document.getElementById('ctxText'),
+      textRow = document.getElementById('textRow');
+
+const elements = {
+  grid: null,
+  play_button: null,
+  increase_bet: null,
+  decrease_bet: null,
+  auto_play_button: null,
+  max_bet_button: null,
+  min_bet_button: null,
+  increase_level: null,
+  decrease_level: null,  
+  win_label: null,
+  labels: []
+};  
+
+function updateFontSize(el) {
+  const w = el.offsetWidth;
+  const h = el.offsetHeight;
+  let size = Math.min(h * 0.5, w / el.textContent.length * 1.8);
+  el.style.fontSize = size + "px";
+  el.style.lineHeight = h + "px";  
+}
+
+  
+let current = null;
+function create(type) {
+  if (type !== 'label' && elements[type]) return;
+
+  const el = document.createElement('div');
+  el.className = 'element ' + (type === 'label' ? 'label' : type);
+  el.style.width = '120px';
+  el.style.height = '56px';
+  el.style.left = '32px';
+  el.style.top = '32px';
+  el.dataset.type = type;
+
+  if (type === 'label') {
+    const span = document.createElement('span');
+    span.textContent = '';
+    el.appendChild(span);
+  } else {
+    el.textContent = type.replace(/_/g, ' ').toUpperCase();
+    updateFontSize(el);
+  }
+
+  const handle = document.createElement('div');
+  handle.className = 'handle';
+  el.appendChild(handle);
+
+  canvas.appendChild(el);
+  if (type === 'label') elements.labels.push(el);
+  else elements[type] = el;
+
+  attach(el, handle);
+}
+
+function attach(el, handle) {
+  el.addEventListener('mousedown', startDrag);
+  handle.addEventListener('mousedown', startResize);
+  handle.addEventListener('mouseenter', () => showBadge(el));
+  handle.addEventListener('mouseleave', () => hideBadge(el));
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    current = el;
+    openContext(e.pageX, e.pageY);
+  });
+}
+
+function getPos(el) {
+  const r = el.getBoundingClientRect(),
+        p = canvas.getBoundingClientRect();
+  return {
+    x: Math.round(r.left - p.left),
+    y: Math.round(r.top - p.top),
+    width: Math.round(r.width),
+    height: Math.round(r.height)
+  };
+}
+
+function showBadge(el) {
+  if (el._badge) return updateBadge(el);
+  const b = document.createElement('div');
+  b.className = 'badge';
+  el._badge = b;
+  el.appendChild(b);
+  updateBadge(el);
+}
+
+function updateBadge(el) {
+  const d = getPos(el);
+  el._badge.textContent = `x=${d.x} y=${d.y} w=${d.width} h=${d.height}`;
+}
+
+function hideBadge(el) {
+  if (el._badge) { el._badge.remove(); el._badge = null; }
+}
+
+function startDrag(e) {
+  if (e.target.classList.contains('handle')) return;
+  e.preventDefault();
+  const el = this;
+  const rect = el.getBoundingClientRect(),
+        p = canvas.getBoundingClientRect();
+  const startX = e.clientX,
+        startY = e.clientY;
+  const origX = rect.left - p.left,
+        origY = rect.top - p.top;
+
+  function move(ev) {
+    const nx = Math.max(0, Math.min(origX + ev.clientX - startX, canvas.clientWidth - el.offsetWidth));
+    const ny = Math.max(0, Math.min(origY + ev.clientY - startY, canvas.clientHeight - el.offsetHeight));
+    el.style.left = nx + 'px';
+    el.style.top = ny + 'px';
+    if (el._badge) updateBadge(el);
+  }
+
+  function up() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
+
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+function startResize(e) {
+  e.stopPropagation(); e.preventDefault();
+  const el = this.parentElement;
+  el._resizing = true;
+  const startX = e.clientX,
+        startY = e.clientY,
+        startW = el.offsetWidth,
+        startH = el.offsetHeight;
+
+  function move(ev) {
+    let rawLeft = parseInt(el.style.left) || el.offsetLeft;
+    let rawTop = parseInt(el.style.top) || el.offsetTop;
+    let nw = Math.max(24, Math.min(startW + ev.clientX - startX, canvas.clientWidth - rawLeft));
+    let nh = Math.max(24, Math.min(startH + ev.clientY - startY, canvas.clientHeight - rawTop));
+    el.style.width = nw + 'px';
+    el.style.height = nh + 'px';
+    updateFontSize(el);
+    if (el._badge) updateBadge(el);
+  }
+  function up() { el._resizing = false; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+function openContext(pageX, pageY) {
+  const d = getPos(current);
+  ctxX.value = d.x; ctxY.value = d.y; ctxW.value = d.width; ctxH.value = d.height;
+  textRow.style.display = current.dataset.type === 'label' ? 'flex' : 'none';
+  ctxText.value = current.dataset.type === 'label' ? current.textContent.trim() : '';
+  contextMenu.style.left = pageX + 'px'; contextMenu.style.top = pageY + 'px';
+  contextMenu.style.display = 'flex';
+}
+document.getElementById('btnApply').addEventListener('click', () => {
+  if (!current) return;
+  const nx = Number(ctxX.value)||0, ny = Number(ctxY.value)||0, nw = Math.max(8,Number(ctxW.value)||8), nh = Math.max(8,Number(ctxH.value)||8);
+  const c = canvas.getBoundingClientRect();
+  if (nx+nw>c.width || ny+nh>c.height) { alert("Values exceed 1024 boundary"); return; }
+  current.style.left = nx+'px'; current.style.top = ny+'px'; current.style.width = nw+'px'; current.style.height = nh+'px';
+  if(current.dataset.type==='label') current.firstElementChild.textContent = ctxText.value;
+  contextMenu.style.display='none'; hideBadge(current);
+});
+
+document.getElementById('btnDelete').addEventListener('click', () => {
+  if(!current) return;
+  const t = current.dataset.type;
+  current.remove();
+  if(t==='label'){ const i = elements.labels.indexOf(current); if(i>-1) elements.labels.splice(i,1); } else elements[t]=null;
+  contextMenu.style.display='none';
+});
+
+document.addEventListener('click', e=>{if(!contextMenu.contains(e.target)) contextMenu.style.display='none';});
+
+
+document.getElementById('addGrid').addEventListener('click', ()=>create('grid'));
+document.querySelectorAll('.dropdown-content button').forEach(b => b.addEventListener('click', ()=>create(b.dataset.type)));
+document.getElementById('addWin').addEventListener('click', ()=>create('win_label'));
+document.getElementById('addLabel').addEventListener('click', ()=>create('label'));
+
+canvas.addEventListener('mousemove', e=>{
+  [...canvas.querySelectorAll('.element')].forEach(el=>{
+    const rect = el.getBoundingClientRect(), hx = rect.right-12, hy = rect.bottom-12;
+    const overHandle = e.clientX>=hx-12 && e.clientX<=hx+12 && e.clientY>=hy-12 && e.clientY<=hy+12;
+    if(overHandle) showBadge(el); else if(!el.matches(':hover')&&!el._resizing) hideBadge(el);
+  });
+});
+
+
+
+
+  
+function collectPayload() {
+  const payload = {};
+  const c = canvas.getBoundingClientRect();
+  function to1024(v,axis){ return Math.round(v/(axis===0?c.width:c.height)*1024); }
+
+  for(const k in elements){
+    if(k==='labels') continue;
+    if(elements[k]){
+      const d = getPos(elements[k]);
+      payload[k] = { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1) };
+    }
+  }
+
+  payload.Labels = elements.labels.map(l=>{
+    const d = getPos(l);
+    return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:l.firstElementChild?l.firstElementChild.textContent:'' };
+  });
+
+  payload.message = document.getElementById('msgInput').value;
+  return payload;
+}
+
+sendButton.addEventListener('click', ()=>{
+  const payload = collectPayload();
+  document.getElementById("waitMessage").style.display="block";
+  fetch(`${url}/receive_message`, {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify({ session_id, rects: payload })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    document.getElementById("waitMessage").style.display="none";
+    if(data.status==="True") console.log("Server reply:", data.reply);
+    else console.error("Error:", data.reply);
+  })
+  .catch(err=>{ console.error(err); document.getElementById("waitMessage").style.display="none"; });
+});
+
+function checkStatus(){
+  fetch(`${url}/get_status`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ session_id })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    const percent = data.process_percent||0;
+    const progressContainer = document.getElementById("progressContainer");
+    const progressFill = document.getElementById("progressFill");
+    const links = document.getElementById("links");
+    if(percent>0 && percent<100){
+      progressContainer.style.display="block"; links.style.display="none"; progressFill.style.width=percent+"%";
+      sendButton.disabled=true;
+    } else if(percent===100){
+      progressFill.style.width="100%"; progressContainer.style.display="block"; links.style.display="block";
+      document.getElementById("playLink").href = url + data.game_link;
+      document.getElementById("downloadLink").href = url + data.download_link;
+      const iframe=document.getElementById("gamePreview");
+      if(iframe) iframe.src = url + data.game_link;
+      sendButton.disabled=false;
+    } else {
+      progressContainer.style.display="none"; links.style.display="none"; progressFill.style.width="0%";
+    }
+  })
+  .catch(err=>console.error("Status error:", err));
+}
 setInterval(checkStatus,1000);
 </script>
-
 </body>
 </html>
