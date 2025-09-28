@@ -103,6 +103,8 @@
         <div class="grid-bg"></div>
       </div>
       <div class="panel">
+
+        <div id="chatBox" style="width:100%; max-height:200px; overflow:auto; background:#111; padding:10px; border-radius:8px; color:#fff"></div>
         <textarea id="msgInput" class="textarea" placeholder="Type prompt..."></textarea>
         <div class="sendRow">
           <button class="btn primary" id="send">Send</button>
@@ -369,8 +371,21 @@ sendButton.addEventListener('click', ()=>{
   .then(res=>res.json())
   .then(data=>{
     document.getElementById("waitMessage").style.display="none";
-    if(data.status==="True") console.log("Server reply:", data.reply);
-    else console.error("Error:", data.reply);
+   if (data.status === "True") {
+  const chatBox = document.getElementById("chatBox");
+  const userMsg = document.createElement("div");
+  userMsg.textContent = "You: " + payload.message;
+  userMsg.style.marginBottom = "6px";
+  chatBox.appendChild(userMsg);
+  const botMsg = document.createElement("div");
+  botMsg.textContent = "Bot: " + data.reply;
+  botMsg.style.color = "#7dd3fc";
+  botMsg.style.marginBottom = "10px";
+  chatBox.appendChild(botMsg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+} else {
+  console.error("Error:", data.reply);
+}
   })
   .catch(err=>{ console.error(err); document.getElementById("waitMessage").style.display="none"; });
 });
