@@ -115,7 +115,8 @@
         </div>
         <div id="links">
           <a id="playLink" href="#" target="_blank">Play Game</a>
-          <a id="downloadLink" href="#" target="_blank">Download</a>
+          <a id="downloadLink" href="#" target="_blank">Download Gmae file</a>
+          <a id="downloadAnalysis" href="#" target="_blank">Download Analysis</a>
         </div>
       </div>
     </div>
@@ -409,6 +410,7 @@ function checkStatus(){
       progressFill.style.width="100%"; progressContainer.style.display="block"; links.style.display="block";
       document.getElementById("playLink").href = url + data.game_link;
       document.getElementById("downloadLink").href = url + data.download_link;
+      document.getElementById("downloadAnalysis").href = url + data.analysis_link;
       const iframe=document.getElementById("gamePreview");
       if(iframe) iframe.src = url + data.game_link;
       sendButton.disabled=false;
