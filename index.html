@@ -33,6 +33,7 @@
     .min_bet_button{background:linear-gradient(90deg,#84cc16,#a3e635);color:#04221a}
     .increase_level{background:linear-gradient(90deg,#ec4899,#f472b6);color:#fff}
     .decrease_level{background:linear-gradient(90deg,#ec4899,#f472b6);color:#fff}
+    .sprite {background: linear-gradient(90deg, #f87171, #fca5a5);color: #031724;padding: 6px 8px;border-radius:8px}
     .win_label{background:linear-gradient(90deg,#8b5cf6,#c084fc);color:#07121a;padding:6px 10px;border-radius:8px}
     .label{background:linear-gradient(90deg,#60a5fa,#7dd3fc);color:#031724;padding:6px 8px;border-radius:8px}
     .handle{position:absolute;right:-10px;bottom:-10px;width:18px;height:18px;border-radius:6px;background:#fff;border:2px solid rgba(0,0,0,0.12);cursor:se-resize;z-index:20}
@@ -95,6 +96,7 @@
         </div>
         <button class="btn" id="addWin">Insert Win</button>
         <button class="btn" id="addLabel">Insert Label</button>
+        <button class="btn" id="addSprite">Insert Sprite</button>
       </div>
     </div>
 
@@ -160,7 +162,8 @@ const elements = {
   increase_level: null,
   decrease_level: null,  
   win_label: null,
-  labels: []
+  labels: [],
+  sprites: [] 
 };  
 
 function updateFontSize(el) {
@@ -184,7 +187,7 @@ function create(type) {
   el.style.top = '32px';
   el.dataset.type = type;
 
-  if (type === 'label') {
+  if (type === 'label'  || type === 'sprite') {
     const span = document.createElement('span');
     span.textContent = '';
     el.appendChild(span);
@@ -199,6 +202,7 @@ function create(type) {
 
   canvas.appendChild(el);
   if (type === 'label') elements.labels.push(el);
+  else if (type === 'sprite') elements.sprites.push(el);
   else elements[type] = el;
 
   attach(el, handle);
@@ -296,8 +300,9 @@ function startResize(e) {
 function openContext(pageX, pageY) {
   const d = getPos(current);
   ctxX.value = d.x; ctxY.value = d.y; ctxW.value = d.width; ctxH.value = d.height;
-  textRow.style.display = current.dataset.type === 'label' ? 'flex' : 'none';
-  ctxText.value = current.dataset.type === 'label' ? current.textContent.trim() : '';
+const isTextType = ['label', 'sprite'].includes(current.dataset.type);
+textRow.style.display = isTextType ? 'flex' : 'none';
+ctxText.value = isTextType ? current.textContent.trim() : '';
   contextMenu.style.left = pageX + 'px'; contextMenu.style.top = pageY + 'px';
   contextMenu.style.display = 'flex';
 }
@@ -307,17 +312,29 @@ document.getElementById('btnApply').addEventListener('click', () => {
   const c = canvas.getBoundingClientRect();
   if (nx+nw>c.width || ny+nh>c.height) { alert("Values exceed 1024 boundary"); return; }
   current.style.left = nx+'px'; current.style.top = ny+'px'; current.style.width = nw+'px'; current.style.height = nh+'px';
-  if(current.dataset.type==='label') current.firstElementChild.textContent = ctxText.value;
+  if(['label','sprite'].includes(current.dataset.type)){
+  current.firstElementChild.textContent = ctxText.value;}
   contextMenu.style.display='none'; hideBadge(current);
 });
 
 document.getElementById('btnDelete').addEventListener('click', () => {
-  if(!current) return;
+  if (!current) return;
   const t = current.dataset.type;
   current.remove();
-  if(t==='label'){ const i = elements.labels.indexOf(current); if(i>-1) elements.labels.splice(i,1); } else elements[t]=null;
-  contextMenu.style.display='none';
+
+  if (t === 'label') {
+    const i = elements.labels.indexOf(current);
+    if (i > -1) elements.labels.splice(i, 1);
+  } else if (t === 'sprite') {
+    const i = elements.sprites.indexOf(current);
+    if (i > -1) elements.sprites.splice(i, 1);
+  } else {
+    elements[t] = null;
+  }
+
+  contextMenu.style.display = 'none';
 });
+
 
 document.addEventListener('click', e=>{if(!contextMenu.contains(e.target)) contextMenu.style.display='none';});
 
@@ -326,6 +343,7 @@ document.getElementById('addGrid').addEventListener('click', ()=>create('grid'))
 document.querySelectorAll('.dropdown-content button').forEach(b => b.addEventListener('click', ()=>create(b.dataset.type)));
 document.getElementById('addWin').addEventListener('click', ()=>create('win_label'));
 document.getElementById('addLabel').addEventListener('click', ()=>create('label'));
+document.getElementById('addSprite').addEventListener('click', ()=>create('sprite'));
 
 canvas.addEventListener('mousemove', e=>{
   [...canvas.querySelectorAll('.element')].forEach(el=>{
@@ -357,11 +375,20 @@ function collectPayload() {
     return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:l.firstElementChild?l.firstElementChild.textContent:'' };
   });
 
+
+payload.Sprites = elements.sprites.map(s=>{
+  const d = getPos(s);
+  return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:s.firstElementChild ? s.firstElementChild.textContent : '' };
+});
+
+
+  
   payload.message = document.getElementById('msgInput').value;
   return payload;
 }
 
 sendButton.addEventListener('click', ()=>{
+  console.log("Sending JSON to server:", JSON.stringify({ session_id, rects: payload }, null, 2));
   const payload = collectPayload();
   document.getElementById("waitMessage").style.display="block";
   fetch(`${url}/receive_message`, {
