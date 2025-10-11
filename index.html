@@ -357,7 +357,9 @@ canvas.addEventListener('mousemove', e=>{
 
 
   
-function collectPayload() {
+
+
+ function collectPayload() {
   const payload = {};
   const c = canvas.getBoundingClientRect();
   function to1024(v,axis){ return Math.round(v/(axis===0?c.width:c.height)*1024); }
@@ -375,17 +377,15 @@ function collectPayload() {
     return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:l.firstElementChild?l.firstElementChild.textContent:'' };
   });
 
+  payload.Sprites = elements.sprites.map(s=>{
+    const d = getPos(s);
+    return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:s.firstElementChild ? s.firstElementChild.textContent : '' };
+  });
 
-payload.Sprites = elements.sprites.map(s=>{
-  const d = getPos(s);
-  return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:s.firstElementChild ? s.firstElementChild.textContent : '' };
-});
-
-
-  
   payload.message = document.getElementById('msgInput').value;
   return payload;
 }
+
 
 sendButton.addEventListener('click', ()=>{
   
