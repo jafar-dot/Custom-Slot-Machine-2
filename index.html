@@ -391,35 +391,37 @@ sendButton.addEventListener('click', ()=>{
   
   const payload = collectPayload();
 
-   console.log("=== JSON THAT WILL BE SENT ===");
+  console.log("=== JSON THAT WILL BE SENT ===");
   console.log(JSON.stringify({ session_id, rects: payload }, null, 2));
-  document.getElementById("waitMessage").style.display="block";
-  fetch(`${url}/receive_message`, {
-    method: "POST",
-    headers: { "Content-Type":"application/json" },
-    body: JSON.stringify({ session_id, rects: payload })
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    document.getElementById("waitMessage").style.display="none";
-   if (data.status === "True") {
-  const chatBox = document.getElementById("chatBox");
-  const userMsg = document.createElement("div");
-  userMsg.textContent = "You: " + payload.message;
-  userMsg.style.marginBottom = "6px";
-  chatBox.appendChild(userMsg);
-  const botMsg = document.createElement("div");
-  botMsg.textContent = "Bot: " + data.reply;
-  botMsg.style.color = "#7dd3fc";
-  botMsg.style.marginBottom = "10px";
-  chatBox.appendChild(botMsg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-} else {
-  console.error("Error:", data.reply);
-}
-  })
-  .catch(err=>{ console.error(err); document.getElementById("waitMessage").style.display="none"; });
+  
+  // document.getElementById("waitMessage").style.display="block";
+  // fetch(`${url}/receive_message`, {
+  //   method: "POST",
+  //   headers: { "Content-Type":"application/json" },
+  //   body: JSON.stringify({ session_id, rects: payload })
+  // })
+  // .then(res=>res.json())
+  // .then(data=>{
+  //   document.getElementById("waitMessage").style.display="none";
+  //  if (data.status === "True") {
+  // const chatBox = document.getElementById("chatBox");
+  // const userMsg = document.createElement("div");
+  // userMsg.textContent = "You: " + payload.message;
+  // userMsg.style.marginBottom = "6px";
+  // chatBox.appendChild(userMsg);
+  // const botMsg = document.createElement("div");
+  // botMsg.textContent = "Bot: " + data.reply;
+  // botMsg.style.color = "#7dd3fc";
+  // botMsg.style.marginBottom = "10px";
+  // chatBox.appendChild(botMsg);
+  // chatBox.scrollTop = chatBox.scrollHeight;
+  // } else {
+  // console.error("Error:", data.reply);
+  // }
+  // })
+  // .catch(err=>{ console.error(err); document.getElementById("waitMessage").style.display="none"; });
 });
+
 
 function checkStatus(){
   fetch(`${url}/get_status`, {
