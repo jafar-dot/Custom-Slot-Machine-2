@@ -359,32 +359,41 @@ canvas.addEventListener('mousemove', e=>{
   
 
 
- function collectPayload() {
+function collectPayload() {
   const payload = {};
   const c = canvas.getBoundingClientRect();
-  function to1024(v,axis){ return Math.round(v/(axis===0?c.width:c.height)*1024); }
+  function to1024(v, axis){ return Math.round(v/(axis===0?c.width:c.height)*1024); }
 
-  for(const k in elements){
-    if(k==='labels') continue;
-    if(elements[k]){
-      const d = getPos(elements[k]);
-      payload[k] = { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1) };
+  for (const k in elements) {
+    if (k === 'labels') continue;
+    const el = elements[k];
+    if (!el) continue;
+    if (typeof el.getBoundingClientRect !== 'function') {
+      console.warn("Skipping non-element in elements['" + k + "']:", el);
+      continue;
     }
+    const d = getPos(el);
+    payload[k] = { x: to1024(d.x,0), y: to1024(d.y,1), width: to1024(d.width,0), height: to1024(d.height,1) };
   }
 
-  payload.Labels = elements.labels.map(l=>{
-    const d = getPos(l);
-    return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:l.firstElementChild?l.firstElementChild.textContent:'' };
-  });
+  payload.Labels = elements.labels
+    .filter(l => l && typeof l.getBoundingClientRect === 'function')
+    .map(l => {
+      const d = getPos(l);
+      return { x: to1024(d.x,0), y: to1024(d.y,1), width: to1024(d.width,0), height: to1024(d.height,1), text: l.firstElementChild ? l.firstElementChild.textContent : '' };
+    });
 
-  payload.Sprites = elements.sprites.map(s=>{
-    const d = getPos(s);
-    return { x:to1024(d.x,0), y:to1024(d.y,1), width:to1024(d.width,0), height:to1024(d.height,1), text:s.firstElementChild ? s.firstElementChild.textContent : '' };
-  });
+  payload.Sprites = elements.sprites
+    .filter(s => s && typeof s.getBoundingClientRect === 'function')
+    .map(s => {
+      const d = getPos(s);
+      return { x: to1024(d.x,0), y: to1024(d.y,1), width: to1024(d.width,0), height: to1024(d.height,1), text: s.firstElementChild ? s.firstElementChild.textContent : '' };
+    });
 
   payload.message = document.getElementById('msgInput').value;
   return payload;
 }
+
 
 
 sendButton.addEventListener('click', ()=>{
