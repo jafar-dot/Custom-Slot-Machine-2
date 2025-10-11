@@ -388,8 +388,11 @@ payload.Sprites = elements.sprites.map(s=>{
 }
 
 sendButton.addEventListener('click', ()=>{
-  console.log("Sending JSON to server:", JSON.stringify({ session_id, rects: payload }, null, 2));
+  
   const payload = collectPayload();
+
+   console.log("=== JSON THAT WILL BE SENT ===");
+  console.log(JSON.stringify({ session_id, rects: payload }, null, 2));
   document.getElementById("waitMessage").style.display="block";
   fetch(`${url}/receive_message`, {
     method: "POST",
