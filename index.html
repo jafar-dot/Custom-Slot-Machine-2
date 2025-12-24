@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Game UI Editor 1024x1024</title>
+  <title>Game UI Editor Pro</title>
   <style>
     :root {
       --bg-dark: #020617;
@@ -27,7 +27,7 @@
       background-color: var(--bg-dark);
       background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 70%);
       color: var(--text-main);
-      overflow: hidden; /* Prevent body scroll */
+      overflow: hidden;
     }
 
     .container {
@@ -42,12 +42,12 @@
     /* --- HEADER --- */
     .header {
       width: 100%;
-      /* Matches canvas width + panel roughly */
-      max-width: 1400px;
+      /* Increased max-width to allow full screen usage */
+      max-width: 100%; 
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      padding: 0 10px;
+      padding: 0 20px;
       position: relative;
       z-index: 500;
       flex-shrink: 0;
@@ -125,61 +125,60 @@
     .canvasWrap {
       width: 100%;
       height: 100%;
-      display: flex; /* Flex to separate Canvas and Panel */
-      gap: 20px;
-      overflow: hidden; /* Panel stays, Canvas area scrolls if needed */
-      justify-content: center;
+      display: flex;
+      gap: 15px; /* Reduced gap slightly */
+      overflow: hidden;
+      padding: 0 20px; /* Add padding on sides */
     }
 
-    /* Scrollable Area for Canvas (to support 1024px on small screens) */
+    /* Scrollable Area for Canvas */
     .canvas-scroll-area {
-      flex: 1;
-      overflow: auto; /* Allows scrolling if 1024px > screen width */
+      flex: 1; /* Takes all remaining space */
+      overflow: auto;
       display: flex;
-      justify-content: center; /* Center horizontally */
-      align-items: flex-start; /* Top align */
-      background: rgba(0,0,0,0.2);
+      justify-content: center; /* Centers canvas horizontally */
+      align-items: flex-start;
+      background: rgba(0,0,0,0.15); /* Slightly darker to distinguish area */
       border-radius: 12px;
       padding: 20px;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.03);
     }
 
     /* --- THE 1024x1024 STATIC CANVAS --- */
     .canvas {
-      /* STRICT FIXED DIMENSIONS */
       width: 1024px;
       height: 1024px;
-      min-width: 1024px; /* Force it to never shrink */
+      min-width: 1024px;
       min-height: 1024px;
-      
       border-radius: 2px;
       position: relative;
       overflow: hidden;
       border: 2px solid rgba(56, 189, 248, 0.3);
       box-shadow: 0 0 50px rgba(0,0,0,0.5);
       background-color: #0b1121;
-      
-      /* Perfect Grid for 1024 (64px cells) */
       background-image: 
         linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px), 
         linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
       background-size: 64px 64px;
     }
     
-    /* Center lines */
     .canvas::after {
       content: ''; position: absolute; inset: 0; pointer-events: none;
       background: 
         linear-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px),
         linear-gradient(90deg, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
-      background-size: 1024px 1024px; /* Just one big cross at 0,0 technically repeats but aligns */
-      background-position: -1px -1px; /* Offset to show border */
+      background-size: 1024px 1024px; 
+      background-position: -1px -1px;
     }
 
-    /* --- RIGHT PANEL --- */
+    /* --- RIGHT PANEL (EXPANDED) --- */
     .panel {
-      width: 350px;
-      min-width: 350px; /* Fixed width sidebar */
+      /* FIXED: Increased width to 480px to fill the gap and allow better chat experience */
+      width: 480px;
+      min-width: 350px; /* Minimum width ensures it doesn't break on small screens */
+      max-width: 30%; /* Limits it on ultra-wide screens */
+      flex-shrink: 0; /* Prevents shrinking */
+      
       background: var(--bg-panel);
       padding: 16px;
       border-radius: 12px;
@@ -191,18 +190,20 @@
     }
 
     .panel-header {
-      font-size: 13px; font-weight: 700; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px;
+      font-size: 14px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px; padding-bottom: 10px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex; justify-content: space-between; align-items: center;
     }
 
+    /* Chat Container - Now takes advantage of the wider panel */
     .chat-container {
       background: #020617; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
-      padding: 12px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+      padding: 15px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
     }
 
     .msg {
-      max-width: 90%; padding: 10px 14px; border-radius: 12px; font-size: 13px;
+      max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px;
       line-height: 1.5; position: relative; word-wrap: break-word;
     }
     .msg.user { align-self: flex-end; background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-bottom-right-radius: 2px; }
@@ -210,8 +211,8 @@
     .msg.error { align-self: flex-start; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); border-bottom-left-radius: 2px; font-weight: bold; }
 
     .textarea {
-      width: 100%; height: 80px; padding: 10px; border-radius: 8px;
-      border: 1px solid var(--border); background: #0b1121; color: var(--text-main); resize: none;
+      width: 100%; height: 80px; padding: 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: #0b1121; color: var(--text-main); resize: none; font-size: 14px;
     }
     .textarea:focus { border-color: var(--accent-primary); }
 
@@ -224,7 +225,6 @@
     }
     .element:active { cursor: grabbing; border-color: #fff; z-index: 50; }
 
-    /* Colors */
     .grid { background: linear-gradient(135deg, rgba(37,99,235,0.8), rgba(29, 78, 216, 0.9)); }
     .play_button { background: linear-gradient(135deg, #10b981, #059669); }
     .auto_play_button { background: linear-gradient(135deg, #06b6d4, #0891b2); }
@@ -248,7 +248,6 @@
       pointer-events: none; z-index: 100; white-space: nowrap;
     }
 
-    /* Context Menu */
     .context {
       position: absolute; display: none; flex-direction: column; gap: 8px; padding: 12px;
       border-radius: 8px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
@@ -302,10 +301,13 @@
       </div>
       
       <div class="panel">
-        <div class="panel-header">AI Assistant</div>
+        <div class="panel-header">
+          <span>AI Assistant</span>
+          <span style="font-size:10px; opacity:0.5">Online</span>
+        </div>
         
         <div id="chatBox" class="chat-container">
-           <div class="msg bot">System ready. Canvas is fixed at 1024x1024. Add elements and click Send.</div>
+           <div class="msg bot">System ready. Canvas fixed at 1024x1024.</div>
         </div>
         
         <textarea id="msgInput" class="textarea" placeholder="Describe game rules..."></textarea>
@@ -374,7 +376,6 @@ function create(type) {
 
   const el = document.createElement('div');
   el.className = 'element ' + (type === 'label' ? 'label' : type);
-  // Default sizes: Grid is big, buttons are small
   el.style.width = type==='grid'?'512px':'128px'; 
   el.style.height = type==='grid'?'512px':'64px';
   el.style.left = '64px';
@@ -418,18 +419,11 @@ function attach(el, handle) {
   el.addEventListener('contextmenu', e => { e.preventDefault(); current=el; openContext(e.pageX, e.pageY); });
 }
 
-// Coordinate Logic: 
-// Since canvas is fixed 1024x1024, getBoundingClientRect() will return scaled pixels if browser is zoomed,
-// but offset calculations are relative. We must ensure we return 0-1024 range.
 function getPos(el) {
   const r = el.getBoundingClientRect();
   const p = canvas.getBoundingClientRect();
-  
-  // Logic: (Element Pos - Canvas Pos) / (Canvas Width) * 1024
-  // This ensures that even if browser zoom makes canvas 2048px on screen, we still get 0-1024.
   const scaleX = 1024 / p.width;
   const scaleY = 1024 / p.height;
-
   return { 
     x: Math.round((r.left - p.left) * scaleX), 
     y: Math.round((r.top - p.top) * scaleY), 
@@ -449,12 +443,9 @@ function startDrag(e) {
   if (e.target.classList.contains('handle')) return;
   const el = this; 
   const p = canvas.getBoundingClientRect();
-  
-  // Calculate scale factor in case of browser zoom
   const scaleX = 1024 / p.width;
   const scaleY = 1024 / p.height;
   
-  // Current position in CSS pixels
   const startLeft = parseInt(el.style.left || 0);
   const startTop = parseInt(el.style.top || 0);
   const startX = e.clientX;
@@ -463,54 +454,13 @@ function startDrag(e) {
   el.style.zIndex = 100;
 
   function move(ev) {
-    // Delta in screen pixels * scale = Delta in 1024 units
-    const dx = (ev.clientX - startX) * scaleX;
-    const dy = (ev.clientY - startY) * scaleY;
-    
-    // Convert back to 1024-based CSS pixels (since our canvas is strictly 1024 CSS pixels internally)
-    // Wait! Since canvas IS 1024px in CSS, we don't need to scale IF the browser handles zoom natively.
-    // However, if we use scale transform, we need this. 
-    // Given we used fixed width: 1024px, we just need to handle the mouse delta relative to the computed style.
-    // A simpler way for drag:
-    
-    let newLeft = startLeft + (ev.clientX - startX); // This is risky with zoom
-    let newTop = startTop + (ev.clientY - startY); 
-    
-    // Better way: Re-calculate relative to canvas rect
-    // But we need to keep it simple and robust.
-    // Let's stick to standard offset logic but clamp to 1024.
-    
-    // Re-calculating properly:
-    const currentMouseX = ev.clientX;
-    const currentMouseY = ev.clientY;
-    
-    // Position relative to canvas top-left in screen pixels
-    const relX = currentMouseX - p.left;
-    const relY = currentMouseY - p.top;
-    
-    // Convert to 1024 space
-    let finalX = (relX * scaleX) - ( (startX - p.left) * scaleX - startLeft ); 
-    // ^ This is getting complex.
-    
-    // SIMPLEST WORKING LOGIC for FIXED CANVAS:
-    // Just use delta * scale.
-    // Because canvas width in CSS is 1024px. If zoom is 200%, clientWidth might report differently or clientRect.
-    // If we use ev.movementX it's better but buggy in some browsers.
-    
-    // Let's go with the initial logic but apply scale correction for zoom.
-    const deltaX = (ev.clientX - startX); // Screen pixels moved
+    const deltaX = (ev.clientX - startX);
     const deltaY = (ev.clientY - startY);
-    
-    // We need to know how many "CSS pixels" that corresponds to.
-    // If canvas is displayed at 2048px (200% zoom), 2 screen pixels = 1 CSS pixel.
-    // p.width = 2048. scaleX = 0.5.
-    // moved 20px screen -> 10px CSS. Correct.
     
     let nx = startLeft + (deltaX * scaleX);
     let ny = startTop + (deltaY * scaleY);
     
-    // Clamp
-    nx = Math.max(0, Math.min(nx, 1024 - (el.offsetWidth * scaleX))); // Approximate width in logic
+    nx = Math.max(0, Math.min(nx, 1024 - (el.offsetWidth * scaleX))); 
     ny = Math.max(0, Math.min(ny, 1024 - (el.offsetHeight * scaleY)));
 
     el.style.left = nx + 'px'; 
@@ -557,7 +507,6 @@ function openContext(x, y) {
   if(isTxt) ctxText.value = current.firstElementChild.textContent;
   
   let left = x, top = y;
-  // Prevent menu off-screen
   if(left+200 > window.innerWidth) left = window.innerWidth - 220;
   if(top+200 > window.innerHeight) top = window.innerHeight - 220;
   
@@ -593,26 +542,19 @@ document.querySelectorAll('.dropdown-content button').forEach(b => b.onclick = (
 
 function collectPayload() {
   const payload = {};
-  // Because getPos already handles scaling to 1024, we just use that logic
-  
   for (const k in elements) {
     if (k === 'labels' || k === 'sprites') continue;
     const el = elements[k];
-    if (el) {
-      payload[k] = getPos(el); // Use the robust getPos function
-    }
+    if (el) { payload[k] = getPos(el); }
   }
-
   payload.Labels = elements.labels.map(l => {
     const d = getPos(l);
     return { ...d, text: l.firstElementChild ? l.firstElementChild.textContent : '' };
   });
-
   payload.Sprites = elements.sprites.map(s => {
     const d = getPos(s);
     return { ...d, text: s.firstElementChild ? s.firstElementChild.textContent : '' };
   });
-
   payload.message = document.getElementById('msgInput').value;
   return payload;
 }
@@ -634,10 +576,7 @@ sendButton.addEventListener('click', () => {
     headers: { "Content-Type":"application/json" },
     body: JSON.stringify({ session_id, rects: payload })
   })
-  .then(res => {
-      if (!res.ok) throw new Error("Server error");
-      return res.json();
-  })
+  .then(res => { if (!res.ok) throw new Error("Server error"); return res.json(); })
   .then(data => {
     document.getElementById("waitMessage").style.display="none";
     if (data.status === "True") {
@@ -653,8 +592,6 @@ sendButton.addEventListener('click', () => {
   .catch(err => { 
     console.error("Fetch Error:", err); 
     document.getElementById("waitMessage").style.display="none";
-    
-    // --- SERVER OUT ERROR ---
     const botMsg = document.createElement("div");
     botMsg.className = "msg error";
     botMsg.textContent = "Server out, try again later..";
@@ -686,18 +623,16 @@ function checkStatus(){
       progressFill.style.width="100%"; 
       setTimeout(()=>{ progressContainer.style.display="none"; }, 1000);
       links.style.display="flex"; 
-      
       document.getElementById("playLink").href = url + data.game_link;
       document.getElementById("downloadLink").href = url + data.download_link;
       document.getElementById("downloadAnalysis").href = url + data.analysis_link;
-      
       sendButton.disabled=false;
       sendButton.textContent = "Send";
     } else {
       progressContainer.style.display="none";
     }
   })
-  .catch(err=> { /* Status check silent fail is acceptable */ });
+  .catch(err=> { });
 }
 setInterval(checkStatus,1000);
 </script>
