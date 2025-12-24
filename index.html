@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Game UI Editor Pro</title>
+  <title>Game UI Editor 1024x1024</title>
   <style>
     :root {
       --bg-dark: #020617;
@@ -15,7 +15,7 @@
       --accent-secondary: #818cf8;
       --success: #10b981;
       --danger: #ef4444;
-      --glass: rgba(15, 23, 42, 0.85);
+      --glass: rgba(15, 23, 42, 0.9);
     }
 
     * { box-sizing: border-box; outline: none; }
@@ -27,7 +27,7 @@
       background-color: var(--bg-dark);
       background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 70%);
       color: var(--text-main);
-      overflow: hidden;
+      overflow: hidden; /* Prevent body scroll */
     }
 
     .container {
@@ -35,13 +35,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 15px;
-      gap: 15px;
+      padding: 10px;
+      gap: 10px;
     }
 
     /* --- HEADER --- */
     .header {
       width: 100%;
+      /* Matches canvas width + panel roughly */
       max-width: 1400px;
       display: flex;
       justify-content: flex-end;
@@ -49,6 +50,7 @@
       padding: 0 10px;
       position: relative;
       z-index: 500;
+      flex-shrink: 0;
     }
 
     .toolbar {
@@ -72,6 +74,7 @@
       font-weight: 600;
       font-size: 13px;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
     .btn:hover { background: #334155; color: #fff; transform: translateY(-1px); }
 
@@ -83,92 +86,100 @@
     }
     .btn.primary:hover { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
 
-    /* --- DROPDOWN FIX --- */
-    .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; /* Expand hover area slightly */ }
+    /* --- DROPDOWN (Fixed Bridge) --- */
+    .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
     
     .dropdown-content {
       display: none;
       position: absolute;
-      top: 100%; /* Align directly below */
-      margin-top: 5px; /* Visual gap */
+      top: 100%;
+      margin-top: 5px;
       left: 0;
       flex-direction: column;
       background: #1e293b; 
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 8px;
-      overflow: visible; /* Changed to visible for the bridge */
+      overflow: visible; 
       z-index: 1000;
       box-shadow: 0 10px 40px rgba(0,0,0,0.6);
       min-width: 220px;
     }
 
-    /* THE INVISIBLE BRIDGE: This fills the gap so mouse doesn't lose hover */
     .dropdown-content::before {
       content: "";
-      position: absolute;
-      top: -20px; /* Extends up to cover the gap */
-      left: 0;
-      width: 100%;
-      height: 20px;
-      background: transparent;
+      position: absolute; top: -20px; left: 0; width: 100%; height: 20px; background: transparent;
     }
 
     .dropdown:hover .dropdown-content { display: flex; }
     
     .dropdown-content button {
-      background: transparent;
-      border: none;
-      text-align: left;
-      width: 100%;
-      border-radius: 0;
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      color: #ffffff; 
-      font-weight: 500;
-      font-size: 14px;
-      position: relative; /* Ensure it stays above bridge */
-      z-index: 1;
+      background: transparent; border: none; text-align: left; width: 100%;
+      border-radius: 0; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: #ffffff; font-weight: 500; font-size: 14px; position: relative; z-index: 1;
     }
-    /* First button rounded corners */
     .dropdown-content button:first-child { border-top-left-radius: 8px; border-top-right-radius: 8px; }
-    /* Last button rounded corners */
     .dropdown-content button:last-child { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-bottom: none; }
-    
-    .dropdown-content button:hover {
-      background: rgba(56, 189, 248, 0.15); 
-      color: #38bdf8; 
-    }
+    .dropdown-content button:hover { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
 
-    /* --- LAYOUT --- */
+    /* --- LAYOUT WRAPPER --- */
     .canvasWrap {
       width: 100%;
-      max-width: 1400px;
-      display: grid;
-      grid-template-columns: 1fr 340px; 
-      gap: 20px;
       height: 100%;
-      min-height: 0;
-      position: relative;
-      z-index: 1;
+      display: flex; /* Flex to separate Canvas and Panel */
+      gap: 20px;
+      overflow: hidden; /* Panel stays, Canvas area scrolls if needed */
+      justify-content: center;
     }
 
-    .canvas {
-      width: 100%;
-      height: 100%;
+    /* Scrollable Area for Canvas (to support 1024px on small screens) */
+    .canvas-scroll-area {
+      flex: 1;
+      overflow: auto; /* Allows scrolling if 1024px > screen width */
+      display: flex;
+      justify-content: center; /* Center horizontally */
+      align-items: flex-start; /* Top align */
+      background: rgba(0,0,0,0.2);
       border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* --- THE 1024x1024 STATIC CANVAS --- */
+    .canvas {
+      /* STRICT FIXED DIMENSIONS */
+      width: 1024px;
+      height: 1024px;
+      min-width: 1024px; /* Force it to never shrink */
+      min-height: 1024px;
+      
+      border-radius: 2px;
       position: relative;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
       background-color: #0b1121;
+      
+      /* Perfect Grid for 1024 (64px cells) */
       background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), 
-        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-      background-size: 32px 32px;
+        linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+    
+    /* Center lines */
+    .canvas::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: 
+        linear-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+      background-size: 1024px 1024px; /* Just one big cross at 0,0 technically repeats but aligns */
+      background-position: -1px -1px; /* Offset to show border */
     }
 
     /* --- RIGHT PANEL --- */
     .panel {
+      width: 350px;
+      min-width: 350px; /* Fixed width sidebar */
       background: var(--bg-panel);
       padding: 16px;
       border-radius: 12px;
@@ -177,99 +188,43 @@
       flex-direction: column;
       gap: 12px;
       height: 100%; 
-      overflow: hidden;
     }
 
     .panel-header {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding-bottom: 8px;
+      font-size: 13px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
     .chat-container {
-      background: #020617;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.05);
-      padding: 12px;
-      flex-grow: 1; 
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      background: #020617; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
+      padding: 12px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
     }
 
     .msg {
-      max-width: 85%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.5;
-      position: relative;
-      word-wrap: break-word;
+      max-width: 90%; padding: 10px 14px; border-radius: 12px; font-size: 13px;
+      line-height: 1.5; position: relative; word-wrap: break-word;
     }
-
-    .msg.user {
-      align-self: flex-end;
-      background: #1e293b;
-      color: #e2e8f0;
-      border: 1px solid #334155;
-      border-bottom-right-radius: 2px;
-    }
-
-    .msg.bot {
-      align-self: flex-start;
-      background: rgba(56, 189, 248, 0.1);
-      color: #e0f2fe;
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      border-bottom-left-radius: 2px;
-    }
-    
-    /* Error Message Style */
-    .msg.error {
-        align-self: flex-start;
-        background: rgba(239, 68, 68, 0.1);
-        color: #fca5a5;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        border-bottom-left-radius: 2px;
-    }
+    .msg.user { align-self: flex-end; background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-bottom-right-radius: 2px; }
+    .msg.bot { align-self: flex-start; background: rgba(56, 189, 248, 0.1); color: #e0f2fe; border: 1px solid rgba(56, 189, 248, 0.2); border-bottom-left-radius: 2px; }
+    .msg.error { align-self: flex-start; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); border-bottom-left-radius: 2px; font-weight: bold; }
 
     .textarea {
-      width: 100%;
-      height: 70px; 
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #0b1121;
-      color: var(--text-main);
-      resize: none;
+      width: 100%; height: 80px; padding: 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: #0b1121; color: var(--text-main); resize: none;
     }
     .textarea:focus { border-color: var(--accent-primary); }
 
     /* --- ELEMENTS --- */
     .element {
-      position: absolute;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: #fff;
-      user-select: none;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      overflow: hidden;
-      white-space: nowrap;
-      border: 1px solid rgba(255,255,255,0.2);
-      font-size: 14px;
-      cursor: grab;
-      backdrop-filter: blur(4px);
-      z-index: 10;
+      position: absolute; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #fff; user-select: none; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      overflow: hidden; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);
+      font-size: 14px; cursor: grab; backdrop-filter: blur(4px); z-index: 10;
     }
     .element:active { cursor: grabbing; border-color: #fff; z-index: 50; }
 
+    /* Colors */
     .grid { background: linear-gradient(135deg, rgba(37,99,235,0.8), rgba(29, 78, 216, 0.9)); }
     .play_button { background: linear-gradient(135deg, #10b981, #059669); }
     .auto_play_button { background: linear-gradient(135deg, #06b6d4, #0891b2); }
@@ -278,37 +233,37 @@
     .max_bet_button { background: linear-gradient(135deg, #6366f1, #4f46e5); }
     .min_bet_button { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
     .win_label { background: linear-gradient(135deg, #ec4899, #db2777); border-radius: 8px; }
-    .sprite { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.4); }
-    .label { background: transparent; border: 1px dotted rgba(255,255,255,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .sprite { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.5); }
+    .label { background: transparent; border: 1px dotted rgba(255,255,255,0.5); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
     .handle {
-      position: absolute; right: 2px; bottom: 2px; width: 10px; height: 10px;
-      background: rgba(255,255,255,0.5); clip-path: polygon(100% 0, 100% 100%, 0 100%);
-      cursor: se-resize; opacity: 0;
+      position: absolute; right: 0; bottom: 0; width: 12px; height: 12px;
+      background: #fff; cursor: se-resize; opacity: 0; clip-path: polygon(100% 0, 100% 100%, 0 100%);
     }
     .element:hover .handle { opacity: 1; }
 
     .badge {
-      position: absolute; top: -25px; left: 0; background: #020617; color: var(--accent-primary);
-      padding: 3px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #334155;
-      pointer-events: none; z-index: 100;
+      position: absolute; top: -22px; left: 0; background: #020617; color: var(--accent-primary);
+      padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #334155;
+      pointer-events: none; z-index: 100; white-space: nowrap;
     }
 
+    /* Context Menu */
     .context {
-      position: absolute; display: none; flex-direction: column; gap: 10px; padding: 12px;
+      position: absolute; display: none; flex-direction: column; gap: 8px; padding: 12px;
       border-radius: 8px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
-      z-index: 2000; min-width: 200px;
+      z-index: 2000; min-width: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .context .row { display: flex; gap: 8px; align-items: center; }
-    .context label { width: 40px; font-size: 11px; color: var(--text-muted); }
-    .context input { flex: 1; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px; border-radius: 4px; }
-    .context button { flex: 1; padding: 6px; border-radius: 4px; border: none; cursor: pointer; }
+    .context label { width: 30px; font-size: 11px; color: var(--text-muted); font-weight: bold; }
+    .context input { flex: 1; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px; border-radius: 4px; font-size: 12px; }
+    .context button { flex: 1; padding: 6px; border-radius: 4px; border: none; cursor: pointer; font-size: 12px; font-weight: bold; }
     #btnDelete { background: #451a1a; color: #fca5a5; }
     #btnApply { background: var(--accent-primary); color: #000; }
 
-    #progressContainer { height: 4px; background: #334155; border-radius: 2px; overflow: hidden; display: none; }
+    #progressContainer { height: 4px; background: #334155; border-radius: 2px; overflow: hidden; display: none; margin-top: 5px;}
     #progressFill { height: 100%; width: 0%; background: var(--success); transition: width 0.3s; }
-    #links { display: none; flex-direction: column; gap: 6px; }
+    #links { display: none; flex-direction: column; gap: 6px; margin-top: 10px; }
     #links a {
       background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;
       color: var(--accent-primary); text-decoration: none; text-align: center; font-size: 13px;
@@ -342,21 +297,23 @@
     </div>
 
     <div class="canvasWrap">
-      <div id="canvas" class="canvas"></div>
+      <div class="canvas-scroll-area">
+        <div id="canvas" class="canvas"></div>
+      </div>
       
       <div class="panel">
         <div class="panel-header">AI Assistant</div>
         
         <div id="chatBox" class="chat-container">
-           <div class="msg bot">System ready. Add elements to the grid and I will generate the configuration matching your structure.</div>
+           <div class="msg bot">System ready. Canvas is fixed at 1024x1024. Add elements and click Send.</div>
         </div>
         
-        <textarea id="msgInput" class="textarea" placeholder="Describe game rules (e.g. 'Fantasy theme with fire and gold symbols')..."></textarea>
+        <textarea id="msgInput" class="textarea" placeholder="Describe game rules..."></textarea>
         
         <div id="waitMessage" style="display:none; color:var(--accent-secondary); font-size:11px; text-align:right;">Processing...</div>
         <div id="progressContainer"><div id="progressFill"></div></div>
         
-        <div style="display:flex; justify-content:flex-end;">
+        <div style="display:flex; justify-content:flex-end; margin-top:10px;">
           <button class="btn primary" id="send">Send</button>
         </div>
 
@@ -417,10 +374,11 @@ function create(type) {
 
   const el = document.createElement('div');
   el.className = 'element ' + (type === 'label' ? 'label' : type);
-  el.style.width = type==='grid'?'300px':'120px';
-  el.style.height = type==='grid'?'300px':'50px';
-  el.style.left = '50px';
-  el.style.top = '50px';
+  // Default sizes: Grid is big, buttons are small
+  el.style.width = type==='grid'?'512px':'128px'; 
+  el.style.height = type==='grid'?'512px':'64px';
+  el.style.left = '64px';
+  el.style.top = '64px';
   el.dataset.type = type;
 
   if (type === 'label' || type === 'sprite') {
@@ -446,9 +404,9 @@ function create(type) {
 
 function updateFontSize(el) {
   const w = el.offsetWidth, h = el.offsetHeight;
-  if(el.dataset.type === 'grid') { el.style.fontSize = '24px'; return; }
+  if(el.dataset.type === 'grid') { el.style.fontSize = '32px'; return; }
   let size = Math.min(h * 0.4, w / (el.textContent.length||1) * 1.5);
-  el.style.fontSize = Math.max(10, size) + "px";
+  el.style.fontSize = Math.max(12, size) + "px";
   el.style.display="flex"; el.style.alignItems="center"; el.style.justifyContent="center";
 }
 
@@ -460,9 +418,24 @@ function attach(el, handle) {
   el.addEventListener('contextmenu', e => { e.preventDefault(); current=el; openContext(e.pageX, e.pageY); });
 }
 
+// Coordinate Logic: 
+// Since canvas is fixed 1024x1024, getBoundingClientRect() will return scaled pixels if browser is zoomed,
+// but offset calculations are relative. We must ensure we return 0-1024 range.
 function getPos(el) {
-  const r = el.getBoundingClientRect(), p = canvas.getBoundingClientRect();
-  return { x: Math.round(r.left - p.left), y: Math.round(r.top - p.top), width: Math.round(r.width), height: Math.round(r.height) };
+  const r = el.getBoundingClientRect();
+  const p = canvas.getBoundingClientRect();
+  
+  // Logic: (Element Pos - Canvas Pos) / (Canvas Width) * 1024
+  // This ensures that even if browser zoom makes canvas 2048px on screen, we still get 0-1024.
+  const scaleX = 1024 / p.width;
+  const scaleY = 1024 / p.height;
+
+  return { 
+    x: Math.round((r.left - p.left) * scaleX), 
+    y: Math.round((r.top - p.top) * scaleY), 
+    width: Math.round(r.width * scaleX), 
+    height: Math.round(r.height * scaleY) 
+  };
 }
 
 function showBadge(el) {
@@ -474,15 +447,75 @@ function hideBadge(el){ if(el._badge){el._badge.remove(); el._badge=null;} }
 
 function startDrag(e) {
   if (e.target.classList.contains('handle')) return;
-  const el = this; const rect = el.getBoundingClientRect(), p = canvas.getBoundingClientRect();
-  const ox = rect.left - p.left, oy = rect.top - p.top;
-  const sx = e.clientX, sy = e.clientY;
+  const el = this; 
+  const p = canvas.getBoundingClientRect();
+  
+  // Calculate scale factor in case of browser zoom
+  const scaleX = 1024 / p.width;
+  const scaleY = 1024 / p.height;
+  
+  // Current position in CSS pixels
+  const startLeft = parseInt(el.style.left || 0);
+  const startTop = parseInt(el.style.top || 0);
+  const startX = e.clientX;
+  const startY = e.clientY;
+
   el.style.zIndex = 100;
 
   function move(ev) {
-    const nx = Math.max(0, Math.min(ox + ev.clientX - sx, canvas.clientWidth - el.offsetWidth));
-    const ny = Math.max(0, Math.min(oy + ev.clientY - sy, canvas.clientHeight - el.offsetHeight));
-    el.style.left = nx + 'px'; el.style.top = ny + 'px';
+    // Delta in screen pixels * scale = Delta in 1024 units
+    const dx = (ev.clientX - startX) * scaleX;
+    const dy = (ev.clientY - startY) * scaleY;
+    
+    // Convert back to 1024-based CSS pixels (since our canvas is strictly 1024 CSS pixels internally)
+    // Wait! Since canvas IS 1024px in CSS, we don't need to scale IF the browser handles zoom natively.
+    // However, if we use scale transform, we need this. 
+    // Given we used fixed width: 1024px, we just need to handle the mouse delta relative to the computed style.
+    // A simpler way for drag:
+    
+    let newLeft = startLeft + (ev.clientX - startX); // This is risky with zoom
+    let newTop = startTop + (ev.clientY - startY); 
+    
+    // Better way: Re-calculate relative to canvas rect
+    // But we need to keep it simple and robust.
+    // Let's stick to standard offset logic but clamp to 1024.
+    
+    // Re-calculating properly:
+    const currentMouseX = ev.clientX;
+    const currentMouseY = ev.clientY;
+    
+    // Position relative to canvas top-left in screen pixels
+    const relX = currentMouseX - p.left;
+    const relY = currentMouseY - p.top;
+    
+    // Convert to 1024 space
+    let finalX = (relX * scaleX) - ( (startX - p.left) * scaleX - startLeft ); 
+    // ^ This is getting complex.
+    
+    // SIMPLEST WORKING LOGIC for FIXED CANVAS:
+    // Just use delta * scale.
+    // Because canvas width in CSS is 1024px. If zoom is 200%, clientWidth might report differently or clientRect.
+    // If we use ev.movementX it's better but buggy in some browsers.
+    
+    // Let's go with the initial logic but apply scale correction for zoom.
+    const deltaX = (ev.clientX - startX); // Screen pixels moved
+    const deltaY = (ev.clientY - startY);
+    
+    // We need to know how many "CSS pixels" that corresponds to.
+    // If canvas is displayed at 2048px (200% zoom), 2 screen pixels = 1 CSS pixel.
+    // p.width = 2048. scaleX = 0.5.
+    // moved 20px screen -> 10px CSS. Correct.
+    
+    let nx = startLeft + (deltaX * scaleX);
+    let ny = startTop + (deltaY * scaleY);
+    
+    // Clamp
+    nx = Math.max(0, Math.min(nx, 1024 - (el.offsetWidth * scaleX))); // Approximate width in logic
+    ny = Math.max(0, Math.min(ny, 1024 - (el.offsetHeight * scaleY)));
+
+    el.style.left = nx + 'px'; 
+    el.style.top = ny + 'px';
+    
     if(el._badge) updateBadge(el);
   }
   function up() { el.style.zIndex = ''; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
@@ -492,10 +525,22 @@ function startDrag(e) {
 function startResize(e) {
   e.stopPropagation(); e.preventDefault();
   const el = this.parentElement; el._resizing=true;
-  const sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
+  const p = canvas.getBoundingClientRect();
+  const scaleX = 1024 / p.width;
+  const scaleY = 1024 / p.height;
+  
+  const startX = e.clientX;
+  const startY = e.clientY;
+  const startW = parseFloat(el.style.width);
+  const startH = parseFloat(el.style.height);
+
   function move(ev) {
-    const nw = Math.max(20, sw + ev.clientX - sx);
-    const nh = Math.max(20, sh + ev.clientY - sy);
+    const deltaX = (ev.clientX - startX) * scaleX;
+    const deltaY = (ev.clientY - startY) * scaleY;
+    
+    const nw = Math.max(20, startW + deltaX);
+    const nh = Math.max(20, startH + deltaY);
+    
     el.style.width = nw + 'px'; el.style.height = nh + 'px';
     if(!['label','sprite'].includes(el.dataset.type)) updateFontSize(el);
     if(el._badge) updateBadge(el);
@@ -512,8 +557,10 @@ function openContext(x, y) {
   if(isTxt) ctxText.value = current.firstElementChild.textContent;
   
   let left = x, top = y;
-  if(left+200 > window.innerWidth) left -= 210;
-  if(top+250 > window.innerHeight) top -= 260;
+  // Prevent menu off-screen
+  if(left+200 > window.innerWidth) left = window.innerWidth - 220;
+  if(top+200 > window.innerHeight) top = window.innerHeight - 220;
+  
   contextMenu.style.left = left+'px'; contextMenu.style.top = top+'px';
   contextMenu.style.display = 'flex';
 }
@@ -546,32 +593,24 @@ document.querySelectorAll('.dropdown-content button').forEach(b => b.onclick = (
 
 function collectPayload() {
   const payload = {};
-  const c = canvas.getBoundingClientRect();
-  function toRef(v, axis) { return Math.round(v / (axis===0?c.width:c.height) * 1024); }
-
+  // Because getPos already handles scaling to 1024, we just use that logic
+  
   for (const k in elements) {
     if (k === 'labels' || k === 'sprites') continue;
     const el = elements[k];
     if (el) {
-      const d = getPos(el);
-      payload[k] = { x: toRef(d.x,0), y: toRef(d.y,1), width: toRef(d.width,0), height: toRef(d.height,1) };
+      payload[k] = getPos(el); // Use the robust getPos function
     }
   }
 
   payload.Labels = elements.labels.map(l => {
     const d = getPos(l);
-    return { 
-      x: toRef(d.x,0), y: toRef(d.y,1), width: toRef(d.width,0), height: toRef(d.height,1), 
-      text: l.firstElementChild ? l.firstElementChild.textContent : '' 
-    };
+    return { ...d, text: l.firstElementChild ? l.firstElementChild.textContent : '' };
   });
 
   payload.Sprites = elements.sprites.map(s => {
     const d = getPos(s);
-    return { 
-      x: toRef(d.x,0), y: toRef(d.y,1), width: toRef(d.width,0), height: toRef(d.height,1), 
-      text: s.firstElementChild ? s.firstElementChild.textContent : '' 
-    };
+    return { ...d, text: s.firstElementChild ? s.firstElementChild.textContent : '' };
   });
 
   payload.message = document.getElementById('msgInput').value;
@@ -590,14 +629,13 @@ sendButton.addEventListener('click', () => {
   document.getElementById("waitMessage").style.display="block";
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  // Attempt to contact server
   fetch(`${url}/receive_message`, {
     method: "POST",
     headers: { "Content-Type":"application/json" },
     body: JSON.stringify({ session_id, rects: payload })
   })
   .then(res => {
-      if (!res.ok) throw new Error("Network response was not ok");
+      if (!res.ok) throw new Error("Server error");
       return res.json();
   })
   .then(data => {
@@ -609,14 +647,14 @@ sendButton.addEventListener('click', () => {
       chatBox.appendChild(botMsg);
       chatBox.scrollTop = chatBox.scrollHeight;
     } else {
-      console.error("Error:", data.reply);
+      console.error("API Error:", data.reply);
     }
   })
   .catch(err => { 
     console.error("Fetch Error:", err); 
     document.getElementById("waitMessage").style.display="none";
     
-    // --- SERVER OUT / ERROR MESSAGE ---
+    // --- SERVER OUT ERROR ---
     const botMsg = document.createElement("div");
     botMsg.className = "msg error";
     botMsg.textContent = "Server out, try again later..";
@@ -643,7 +681,7 @@ function checkStatus(){
       links.style.display="none"; 
       progressFill.style.width=percent+"%";
       sendButton.disabled=true;
-      sendButton.textContent = `Generating... ${percent}%`;
+      sendButton.textContent = `Processing... ${percent}%`;
     } else if(percent===100){
       progressFill.style.width="100%"; 
       setTimeout(()=>{ progressContainer.style.display="none"; }, 1000);
@@ -659,7 +697,7 @@ function checkStatus(){
       progressContainer.style.display="none";
     }
   })
-  .catch(err=>console.error("Status error:", err)); // Silent fail for status check is usually okay
+  .catch(err=> { /* Status check silent fail is acceptable */ });
 }
 setInterval(checkStatus,1000);
 </script>
