@@ -49,6 +49,9 @@
       justify-content: flex-end;
       align-items: center;
       padding: 0 10px;
+      /* --- FIX: Added z-index to ensure dropdown is on top --- */
+      position: relative;
+      z-index: 500; 
     }
 
     .toolbar {
@@ -104,7 +107,8 @@
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
       overflow: hidden;
-      z-index: 100;
+      /* Increased z-index just to be safe */
+      z-index: 1000; 
       box-shadow: 0 10px 40px rgba(0,0,0,0.5);
       min-width: 200px;
     }
@@ -129,6 +133,9 @@
       gap: 20px;
       height: 100%;
       min-height: 0; /* Flexbox fix */
+      /* Ensure canvas layer is lower than header */
+      position: relative;
+      z-index: 1;
     }
 
     /* Canvas Area with CSS Grid Pattern */
@@ -218,6 +225,7 @@
       letter-spacing: 0.5px;
       cursor: grab;
       backdrop-filter: blur(4px);
+      z-index: 10; /* Base z-index for elements */
     }
 
     .element:active { cursor: grabbing; border-color: #fff; z-index: 50; }
@@ -292,7 +300,7 @@
       border-radius: 8px;
       background: #1e293b;
       border: 1px solid rgba(255,255,255,0.1);
-      z-index: 200;
+      z-index: 2000; /* Very high z-index */
       min-width: 240px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
@@ -563,7 +571,7 @@ function startDrag(e) {
         origY = rect.top - p.top;
 
   // Bring to front
-  el.style.zIndex = 10;
+  el.style.zIndex = 50;
 
   function move(ev) {
     const nx = Math.max(0, Math.min(origX + ev.clientX - startX, canvas.clientWidth - el.offsetWidth));
@@ -574,7 +582,7 @@ function startDrag(e) {
   }
 
   function up() { 
-    el.style.zIndex = '';
+    el.style.zIndex = 10; // Return to normal base z-index
     document.removeEventListener('mousemove', move); 
     document.removeEventListener('mouseup', up); 
   }
