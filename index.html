@@ -9,13 +9,13 @@
       --bg-dark: #020617;
       --bg-panel: #0f172a;
       --border: #1e293b;
-      --text-main: #e2e8f0;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --accent-primary: #38bdf8; /* Sky blue */
-      --accent-secondary: #818cf8; /* Indigo */
+      --accent-primary: #38bdf8;
+      --accent-secondary: #818cf8;
       --success: #10b981;
       --danger: #ef4444;
-      --glass: rgba(15, 23, 42, 0.7);
+      --glass: rgba(15, 23, 42, 0.85);
     }
 
     * { box-sizing: border-box; outline: none; }
@@ -23,12 +23,11 @@
     html, body {
       height: 100%;
       margin: 0;
-      font-family: 'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Segoe UI', Inter, sans-serif;
       background-color: var(--bg-dark);
-      /* Professional Dark Radial Background */
       background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 70%);
       color: var(--text-main);
-      overflow: hidden; /* Prevent body scroll, let container scroll */
+      overflow: hidden;
     }
 
     .container {
@@ -36,22 +35,20 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 15px;
       gap: 15px;
-      overflow-y: auto;
     }
 
-    /* Header & Toolbar */
+    /* --- HEADER --- */
     .header {
       width: 100%;
-      max-width: 1280px;
+      max-width: 1400px;
       display: flex;
       justify-content: flex-end;
       align-items: center;
       padding: 0 10px;
-      /* --- FIX: Added z-index to ensure dropdown is on top --- */
       position: relative;
-      z-index: 500; 
+      z-index: 500;
     }
 
     .toolbar {
@@ -66,23 +63,17 @@
     }
 
     .btn {
-      padding: 10px 18px;
+      padding: 10px 16px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
       background: linear-gradient(180deg, #1e293b, #0f172a);
-      color: var(--text-muted);
+      color: #cbd5e1;
       cursor: pointer;
       font-weight: 600;
       font-size: 13px;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-
-    .btn:hover {
-      background: #334155;
-      color: #fff;
-      transform: translateY(-1px);
-    }
+    .btn:hover { background: #334155; color: #fff; transform: translateY(-1px); }
 
     .btn.primary {
       background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
@@ -90,12 +81,9 @@
       border: none;
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
     }
-    
-    .btn.primary:hover {
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
-    }
+    .btn.primary:hover { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
 
-    /* Dropdown */
+    /* --- DROPDOWN FIX --- */
     .dropdown { position: relative; }
     .dropdown-content {
       display: none;
@@ -103,73 +91,66 @@
       top: calc(100% + 8px);
       left: 0;
       flex-direction: column;
-      background: #1e293b;
-      border: 1px solid rgba(255,255,255,0.1);
+      background: #1e293b; /* Dark Slate */
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 8px;
       overflow: hidden;
-      /* Increased z-index just to be safe */
-      z-index: 1000; 
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      min-width: 200px;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      min-width: 220px;
     }
     .dropdown:hover .dropdown-content { display: flex; }
+    
     .dropdown-content button {
       background: transparent;
       border: none;
       text-align: left;
       width: 100%;
       border-radius: 0;
-      box-shadow: none;
+      padding: 12px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      
+      /* FONT FIX: High contrast white */
+      color: #ffffff; 
+      font-weight: 500;
+      font-size: 14px;
     }
-    .dropdown-content button:hover { background: rgba(255,255,255,0.05); }
+    
+    .dropdown-content button:hover {
+      background: rgba(56, 189, 248, 0.15); /* Light blue accent bg */
+      color: #38bdf8; /* Blue text */
+    }
 
-    /* Main Layout */
+    /* --- LAYOUT --- */
     .canvasWrap {
       width: 100%;
-      max-width: 1280px;
+      max-width: 1400px;
       display: grid;
-      grid-template-columns: 1fr 320px; /* Split view */
+      grid-template-columns: 1fr 340px; /* Right panel fixed width */
       gap: 20px;
       height: 100%;
-      min-height: 0; /* Flexbox fix */
-      /* Ensure canvas layer is lower than header */
+      min-height: 0;
       position: relative;
       z-index: 1;
     }
 
-    /* Canvas Area with CSS Grid Pattern */
     .canvas {
       width: 100%;
-      aspect-ratio: 16/9; /* Standard Game Ratio */
+      height: 100%;
       border-radius: 12px;
       position: relative;
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);
       background-color: #0b1121;
-      /* CSS Pattern Grid */
+      /* Grid Pattern */
       background-image: 
         linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), 
         linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
       background-size: 32px 32px;
     }
-    
-    /* Center lines for the canvas to look like an editor */
-    .canvas::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: 
-        linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
-      background-size: 50% 50%; /* Crosshair center */
-      background-position: center;
-      background-repeat: no-repeat;
-    }
 
-    /* Right Side Panel */
+    /* --- RIGHT PANEL (Expanded Chat) --- */
     .panel {
       background: var(--bg-panel);
       padding: 16px;
@@ -178,36 +159,77 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      height: fit-content;
+      height: 100%; /* Full height of grid cell */
+      overflow: hidden;
     }
 
+    .panel-header {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Chat Styling */
     .chat-container {
       background: #020617;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.05);
-      padding: 10px;
-      height: 250px;
+      padding: 12px;
+      
+      /* Expand to fill available space */
+      flex-grow: 1; 
+      
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 12px;
       font-size: 13px;
       line-height: 1.5;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    /* User Bubble */
+    .msg.user {
+      align-self: flex-end;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      border-bottom-right-radius: 2px;
+    }
+
+    /* Bot Bubble */
+    .msg.bot {
+      align-self: flex-start;
+      background: rgba(56, 189, 248, 0.1);
+      color: #e0f2fe;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-bottom-left-radius: 2px;
     }
 
     .textarea {
       width: 100%;
-      height: 80px;
+      height: 70px; /* Slightly smaller input to save space for chat */
       padding: 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: #0b1121;
       color: var(--text-main);
       resize: none;
-      font-family: inherit;
     }
     .textarea:focus { border-color: var(--accent-primary); }
 
-    .sendRow { display: flex; justify-content: flex-end; }
-
-    /* Draggable Elements Styling */
+    /* --- ELEMENTS & UI --- */
     .element {
       position: absolute;
       border-radius: 6px;
@@ -222,154 +244,63 @@
       white-space: nowrap;
       border: 1px solid rgba(255,255,255,0.2);
       font-size: 14px;
-      letter-spacing: 0.5px;
       cursor: grab;
       backdrop-filter: blur(4px);
-      z-index: 10; /* Base z-index for elements */
+      z-index: 10;
     }
-
     .element:active { cursor: grabbing; border-color: #fff; z-index: 50; }
 
-    /* Specific Element Colors (Gradients) */
+    /* Element Gradients */
     .grid { background: linear-gradient(135deg, rgba(37,99,235,0.8), rgba(29, 78, 216, 0.9)); }
-    
     .play_button { background: linear-gradient(135deg, #10b981, #059669); }
     .auto_play_button { background: linear-gradient(135deg, #06b6d4, #0891b2); }
-    
     .increase_bet, .increase_level { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .decrease_bet, .decrease_level { background: linear-gradient(135deg, #f97316, #ea580c); }
-    
     .max_bet_button { background: linear-gradient(135deg, #6366f1, #4f46e5); }
     .min_bet_button { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-    
     .win_label { background: linear-gradient(135deg, #ec4899, #db2777); border-radius: 8px; }
-    
-    .sprite { 
-      background: rgba(255,255,255,0.1); 
-      border: 1px dashed rgba(255,255,255,0.4); 
-      color: #fff;
-    }
-    
-    .label { 
-      background: transparent; 
-      border: 1px dotted rgba(255,255,255,0.3);
-      color: #fff;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }
+    .sprite { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.4); }
+    .label { background: transparent; border: 1px dotted rgba(255,255,255,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-    /* Resize Handle */
     .handle {
-      position: absolute;
-      right: 2px;
-      bottom: 2px;
-      width: 10px;
-      height: 10px;
-      background: rgba(255,255,255,0.5);
-      clip-path: polygon(100% 0, 100% 100%, 0 100%);
-      cursor: se-resize;
-      opacity: 0;
-      transition: opacity 0.2s;
+      position: absolute; right: 2px; bottom: 2px; width: 10px; height: 10px;
+      background: rgba(255,255,255,0.5); clip-path: polygon(100% 0, 100% 100%, 0 100%);
+      cursor: se-resize; opacity: 0;
     }
     .element:hover .handle { opacity: 1; }
 
-    /* Info Badge */
     .badge {
-      position: absolute;
-      transform: translate(0, -100%);
-      top: -5px;
-      left: 0;
-      background: rgba(0,0,0,0.8);
-      color: var(--accent-primary);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-family: monospace;
-      z-index: 100;
-      pointer-events: none;
-      white-space: nowrap;
-      border: 1px solid rgba(255,255,255,0.1);
+      position: absolute; top: -25px; left: 0; background: #020617; color: var(--accent-primary);
+      padding: 3px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #334155;
+      pointer-events: none; z-index: 100;
     }
 
     /* Context Menu */
     .context {
-      position: absolute;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #1e293b;
-      border: 1px solid rgba(255,255,255,0.1);
-      z-index: 2000; /* Very high z-index */
-      min-width: 240px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      position: absolute; display: none; flex-direction: column; gap: 10px; padding: 12px;
+      border-radius: 8px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+      z-index: 2000; min-width: 200px;
     }
     .context .row { display: flex; gap: 8px; align-items: center; }
-    .context label { font-size: 11px; color: var(--text-muted); width: 40px; text-transform: uppercase; font-weight: bold; }
-    .context input {
-      flex: 1;
-      padding: 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: #0f172a;
-      color: #fff;
-      font-size: 12px;
-    }
-    .context .actions { display: flex; gap: 8px; justify-content: space-between; margin-top: 5px; }
-    .context button {
-      flex: 1;
-      padding: 8px;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 12px;
-    }
-    #btnDelete { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-    #btnDelete:hover { background: rgba(239, 68, 68, 0.4); }
-    #btnApply { background: var(--accent-primary); color: #020617; }
-    #btnApply:hover { background: #0ea5e9; }
+    .context label { width: 40px; font-size: 11px; color: var(--text-muted); }
+    .context input { flex: 1; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px; border-radius: 4px; }
+    .context button { flex: 1; padding: 6px; border-radius: 4px; border: none; cursor: pointer; }
+    #btnDelete { background: #451a1a; color: #fca5a5; }
+    #btnApply { background: var(--accent-primary); color: #000; }
 
-    /* Progress & Footer */
-    #progressContainer {
-      width: 100%;
-      height: 6px;
-      background: #1e293b;
-      margin-top: 10px;
-      border-radius: 3px;
-      overflow: hidden;
-      display: none;
-    }
-    #progressFill {
-      height: 100%;
-      width: 0%;
-      background: var(--success);
-      transition: width 0.3s ease;
-    }
-    #links { display: none; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+    /* Progress & Links */
+    #progressContainer { height: 4px; background: #334155; border-radius: 2px; overflow: hidden; display: none; }
+    #progressFill { height: 100%; width: 0%; background: var(--success); transition: width 0.3s; }
+    #links { display: none; flex-direction: column; gap: 6px; }
     #links a {
-      color: var(--accent-primary);
-      text-decoration: none;
-      font-size: 13px;
-      background: rgba(255,255,255,0.03);
-      padding: 8px;
-      border-radius: 6px;
-      display: block;
-      text-align: center;
-      transition: background 0.2s;
+      background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;
+      color: var(--accent-primary); text-decoration: none; text-align: center; font-size: 13px;
     }
-    #links a:hover { background: rgba(255,255,255,0.08); }
-
-    .footer { font-size: 11px; color: var(--text-muted); margin-top: auto; opacity: 0.5; }
-
-    /* Mobile Responsive */
-    @media (max-width: 900px) {
-      .canvasWrap { grid-template-columns: 1fr; }
-      .canvas { aspect-ratio: 1/1; }
-    }
+    #links a:hover { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
+
   <div class="container">
     <div class="header">
       <div class="toolbar">
@@ -394,53 +325,46 @@
     </div>
 
     <div class="canvasWrap">
-      <div id="canvas" class="canvas">
-        </div>
+      <div id="canvas" class="canvas"></div>
       
       <div class="panel">
-        <h3 style="margin:0; font-size:14px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">AI Assistant</h3>
+        <div class="panel-header">AI Assistant</div>
+        
         <div id="chatBox" class="chat-container">
-           <div style="color:var(--text-muted); font-style:italic;">System ready. Add elements or ask AI to generate config...</div>
-        </div>
-        <textarea id="msgInput" class="textarea" placeholder="Describe how the game logic should work..."></textarea>
-        
-        <div id="waitMessage" style="display:none; color:var(--accent-secondary); font-size:12px; margin-top:5px;">Processing...</div>
-        
-        <div id="progressContainer">
-          <div id="progressFill"></div>
+           <div class="msg bot">System ready. Add elements to the grid and I will generate the configuration matching your structure.</div>
         </div>
         
-        <div class="sendRow">
-          <button class="btn primary" id="send">Generate Code</button>
+        <textarea id="msgInput" class="textarea" placeholder="Describe game rules (e.g. 'Fantasy theme with fire and gold symbols')..."></textarea>
+        
+        <div id="waitMessage" style="display:none; color:var(--accent-secondary); font-size:11px; text-align:right;">Processing...</div>
+        <div id="progressContainer"><div id="progressFill"></div></div>
+        
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn primary" id="send">Generate Game</button>
         </div>
 
-        <div id="links" style="display:none;">
+        <div id="links">
           <a id="playLink" href="#" target="_blank">▶ Play Game</a>
           <a id="downloadLink" href="#" target="_blank">⬇ Download Files</a>
           <a id="downloadAnalysis" href="#" target="_blank">📊 View Analysis</a>
         </div>
       </div>
     </div>
-
-    <div class="footer">Coordinate System: 0..1024 | Design Mode Active</div>
   </div>
 
   <div id="contextMenu" class="context">
-    <div style="font-size:12px; font-weight:bold; color:#fff; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:5px;">Properties</div>
     <div class="row"><label>X</label><input id="ctxX" type="number"/></div>
     <div class="row"><label>Y</label><input id="ctxY" type="number"/></div>
     <div class="row"><label>W</label><input id="ctxW" type="number"/></div>
     <div class="row"><label>H</label><input id="ctxH" type="number"/></div>
-    <div class="row" id="textRow"><label>TXT</label><input id="ctxText" placeholder="Label text..."/></div>
-    <div class="actions">
+    <div class="row" id="textRow"><label>TXT</label><input id="ctxText"/></div>
+    <div class="row" style="margin-top:5px;">
       <button id="btnDelete">Delete</button>
       <button id="btnApply">Update</button>
     </div>
   </div>
 
 <script>
-/* LOGIC REMAINS UNCHANGED - JUST UI UPDATE 
-*/
 const canvas = document.getElementById('canvas');
 const contextMenu = document.getElementById('contextMenu');
 const url = "https://hamster-teaching-serval.ngrok-free.app";
@@ -454,6 +378,7 @@ const ctxX = document.getElementById('ctxX'),
       ctxText = document.getElementById('ctxText'),
       textRow = document.getElementById('textRow');
 
+// Storage for elements (Matches Python keys)
 const elements = {
   grid: null,
   play_button: null,
@@ -469,29 +394,16 @@ const elements = {
   sprites: [] 
 };  
 
-function updateFontSize(el) {
-  const w = el.offsetWidth;
-  const h = el.offsetHeight;
-  // Adjusted font logic for cleaner look
-  let size = Math.min(h * 0.4, w / (el.textContent.length || 1) * 1.5);
-  size = Math.max(10, size); // Minimum size
-  el.style.fontSize = size + "px";
-  // Center vertically nicely
-  el.style.display = "flex";
-  el.style.alignItems = "center";
-  el.style.justifyContent = "center";
-}
-
 let current = null;
 
+// --- Creation & Drag Logic ---
 function create(type) {
   if (type !== 'label' && type !== 'sprite' && elements[type]) return;
 
   const el = document.createElement('div');
   el.className = 'element ' + (type === 'label' ? 'label' : type);
-  // Default sizes
-  el.style.width = '140px';
-  el.style.height = '50px';
+  el.style.width = type==='grid'?'300px':'120px';
+  el.style.height = type==='grid'?'300px':'50px';
   el.style.left = '50px';
   el.style.top = '50px';
   el.dataset.type = type;
@@ -501,7 +413,6 @@ function create(type) {
     span.textContent = type === 'label' ? 'New Label' : 'Sprite';
     el.appendChild(span);
   } else {
-    // Cleaner text formatting
     el.textContent = type.replace(/_/g, ' ').toUpperCase();
     updateFontSize(el);
   }
@@ -509,8 +420,8 @@ function create(type) {
   const handle = document.createElement('div');
   handle.className = 'handle';
   el.appendChild(handle);
-
   canvas.appendChild(el);
+
   if (type === 'label') elements.labels.push(el);
   else if (type === 'sprite') elements.sprites.push(el);
   else elements[type] = el;
@@ -518,236 +429,186 @@ function create(type) {
   attach(el, handle);
 }
 
+function updateFontSize(el) {
+  const w = el.offsetWidth, h = el.offsetHeight;
+  if(el.dataset.type === 'grid') { el.style.fontSize = '24px'; return; }
+  let size = Math.min(h * 0.4, w / (el.textContent.length||1) * 1.5);
+  el.style.fontSize = Math.max(10, size) + "px";
+  el.style.display="flex"; el.style.alignItems="center"; el.style.justifyContent="center";
+}
+
 function attach(el, handle) {
   el.addEventListener('mousedown', startDrag);
   handle.addEventListener('mousedown', startResize);
-  handle.addEventListener('mouseenter', () => showBadge(el));
-  handle.addEventListener('mouseleave', () => hideBadge(el));
-  el.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    current = el;
-    openContext(e.pageX, e.pageY);
-  });
+  el.addEventListener('mouseenter', ()=>showBadge(el));
+  el.addEventListener('mouseleave', ()=>hideBadge(el));
+  el.addEventListener('contextmenu', e => { e.preventDefault(); current=el; openContext(e.pageX, e.pageY); });
 }
 
 function getPos(el) {
-  const r = el.getBoundingClientRect(),
-        p = canvas.getBoundingClientRect();
-  return {
-    x: Math.round(r.left - p.left),
-    y: Math.round(r.top - p.top),
-    width: Math.round(r.width),
-    height: Math.round(r.height)
-  };
+  const r = el.getBoundingClientRect(), p = canvas.getBoundingClientRect();
+  return { x: Math.round(r.left - p.left), y: Math.round(r.top - p.top), width: Math.round(r.width), height: Math.round(r.height) };
 }
 
 function showBadge(el) {
-  if (el._badge) return updateBadge(el);
-  const b = document.createElement('div');
-  b.className = 'badge';
-  el._badge = b;
-  el.appendChild(b);
-  updateBadge(el);
+  if(el._badge) return updateBadge(el);
+  const b = document.createElement('div'); b.className='badge'; el._badge=b; el.appendChild(b); updateBadge(el);
 }
-
-function updateBadge(el) {
-  const d = getPos(el);
-  el._badge.textContent = `X:${d.x} Y:${d.y} [${d.width}x${d.height}]`;
-}
-
-function hideBadge(el) {
-  if (el._badge) { el._badge.remove(); el._badge = null; }
-}
+function updateBadge(el){ const d=getPos(el); el._badge.textContent=`X:${d.x} Y:${d.y} [${d.width}x${d.height}]`; }
+function hideBadge(el){ if(el._badge){el._badge.remove(); el._badge=null;} }
 
 function startDrag(e) {
   if (e.target.classList.contains('handle')) return;
-  e.preventDefault();
-  const el = this;
-  const rect = el.getBoundingClientRect(),
-        p = canvas.getBoundingClientRect();
-  const startX = e.clientX,
-        startY = e.clientY;
-  const origX = rect.left - p.left,
-        origY = rect.top - p.top;
-
-  // Bring to front
-  el.style.zIndex = 50;
+  const el = this; const rect = el.getBoundingClientRect(), p = canvas.getBoundingClientRect();
+  const ox = rect.left - p.left, oy = rect.top - p.top;
+  const sx = e.clientX, sy = e.clientY;
+  el.style.zIndex = 100;
 
   function move(ev) {
-    const nx = Math.max(0, Math.min(origX + ev.clientX - startX, canvas.clientWidth - el.offsetWidth));
-    const ny = Math.max(0, Math.min(origY + ev.clientY - startY, canvas.clientHeight - el.offsetHeight));
-    el.style.left = nx + 'px';
-    el.style.top = ny + 'px';
-    if (el._badge) updateBadge(el);
+    const nx = Math.max(0, Math.min(ox + ev.clientX - sx, canvas.clientWidth - el.offsetWidth));
+    const ny = Math.max(0, Math.min(oy + ev.clientY - sy, canvas.clientHeight - el.offsetHeight));
+    el.style.left = nx + 'px'; el.style.top = ny + 'px';
+    if(el._badge) updateBadge(el);
   }
-
-  function up() { 
-    el.style.zIndex = 10; // Return to normal base z-index
-    document.removeEventListener('mousemove', move); 
-    document.removeEventListener('mouseup', up); 
-  }
-
-  document.addEventListener('mousemove', move);
-  document.addEventListener('mouseup', up);
+  function up() { el.style.zIndex = ''; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
+  document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
 }
 
 function startResize(e) {
   e.stopPropagation(); e.preventDefault();
-  const el = this.parentElement;
-  el._resizing = true;
-  const startX = e.clientX,
-        startY = e.clientY,
-        startW = el.offsetWidth,
-        startH = el.offsetHeight;
-
+  const el = this.parentElement; el._resizing=true;
+  const sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
   function move(ev) {
-    let rawLeft = parseInt(el.style.left) || el.offsetLeft;
-    let rawTop = parseInt(el.style.top) || el.offsetTop;
-    let nw = Math.max(24, Math.min(startW + ev.clientX - startX, canvas.clientWidth - rawLeft));
-    let nh = Math.max(24, Math.min(startH + ev.clientY - startY, canvas.clientHeight - rawTop));
-    el.style.width = nw + 'px';
-    el.style.height = nh + 'px';
-    if (!['label','sprite'].includes(el.dataset.type)) updateFontSize(el);
-    if (el._badge) updateBadge(el);
+    const nw = Math.max(20, sw + ev.clientX - sx);
+    const nh = Math.max(20, sh + ev.clientY - sy);
+    el.style.width = nw + 'px'; el.style.height = nh + 'px';
+    if(!['label','sprite'].includes(el.dataset.type)) updateFontSize(el);
+    if(el._badge) updateBadge(el);
   }
-  function up() { el._resizing = false; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
-  document.addEventListener('mousemove', move);
-  document.addEventListener('mouseup', up);
+  function up() { el._resizing=false; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); }
+  document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
 }
 
-function openContext(pageX, pageY) {
+// --- Context Menu ---
+function openContext(x, y) {
   const d = getPos(current);
-  ctxX.value = d.x; ctxY.value = d.y; ctxW.value = d.width; ctxH.value = d.height;
-  const isTextType = ['label', 'sprite'].includes(current.dataset.type);
-  textRow.style.display = isTextType ? 'flex' : 'none';
+  ctxX.value=d.x; ctxY.value=d.y; ctxW.value=d.width; ctxH.value=d.height;
+  const isTxt = ['label','sprite'].includes(current.dataset.type);
+  textRow.style.display = isTxt ? 'flex' : 'none';
+  if(isTxt) ctxText.value = current.firstElementChild.textContent;
   
-  if(isTextType) {
-      ctxText.value = current.firstElementChild ? current.firstElementChild.textContent : '';
-  }
-
-  // Adjust menu position so it doesn't go off screen
-  const menuW = 240, menuH = 300;
-  let left = pageX;
-  let top = pageY;
-  if (left + menuW > window.innerWidth) left = window.innerWidth - menuW - 20;
-  if (top + menuH > window.innerHeight) top = window.innerHeight - menuH - 20;
-
-  contextMenu.style.left = left + 'px'; 
-  contextMenu.style.top = top + 'px';
+  let left = x, top = y;
+  if(left+200 > window.innerWidth) left -= 210;
+  if(top+250 > window.innerHeight) top -= 260;
+  contextMenu.style.left = left+'px'; contextMenu.style.top = top+'px';
   contextMenu.style.display = 'flex';
 }
 
 document.getElementById('btnApply').addEventListener('click', () => {
-  if (!current) return;
-  const nx = Number(ctxX.value)||0, ny = Number(ctxY.value)||0, nw = Math.max(8,Number(ctxW.value)||8), nh = Math.max(8,Number(ctxH.value)||8);
-  const c = canvas.getBoundingClientRect();
-  // We allow going slightly out of bound on apply manually if needed, or strictly clamp? Let's strictly clamp for safety
-  // if (nx+nw>c.width || ny+nh>c.height) { alert("Values exceed boundary"); return; }
-  
+  if(!current) return;
+  const nx = Number(ctxX.value), ny = Number(ctxY.value), nw = Number(ctxW.value), nh = Number(ctxH.value);
   current.style.left = nx+'px'; current.style.top = ny+'px'; current.style.width = nw+'px'; current.style.height = nh+'px';
-  
-  if(['label','sprite'].includes(current.dataset.type)){
-     if(current.firstElementChild) current.firstElementChild.textContent = ctxText.value;
-  } else {
-     updateFontSize(current);
-  }
+  if(['label','sprite'].includes(current.dataset.type)) current.firstElementChild.textContent = ctxText.value;
+  else updateFontSize(current);
   contextMenu.style.display='none'; hideBadge(current);
 });
 
 document.getElementById('btnDelete').addEventListener('click', () => {
-  if (!current) return;
+  if(!current) return;
   const t = current.dataset.type;
   current.remove();
-
-  if (t === 'label') {
-    const i = elements.labels.indexOf(current);
-    if (i > -1) elements.labels.splice(i, 1);
-  } else if (t === 'sprite') {
-    const i = elements.sprites.indexOf(current);
-    if (i > -1) elements.sprites.splice(i, 1);
-  } else {
-    elements[t] = null;
-  }
-
-  contextMenu.style.display = 'none';
+  if(t==='label'){ const i=elements.labels.indexOf(current); if(i>-1) elements.labels.splice(i,1); }
+  else if(t==='sprite'){ const i=elements.sprites.indexOf(current); if(i>-1) elements.sprites.splice(i,1); }
+  else elements[t] = null;
+  contextMenu.style.display='none';
 });
 
-document.addEventListener('click', e=>{if(!contextMenu.contains(e.target)) contextMenu.style.display='none';});
+document.addEventListener('click', e=>{ if(!contextMenu.contains(e.target)) contextMenu.style.display='none'; });
+document.getElementById('addGrid').onclick = ()=>create('grid');
+document.getElementById('addWin').onclick = ()=>create('win_label');
+document.getElementById('addLabel').onclick = ()=>create('label');
+document.getElementById('addSprite').onclick = ()=>create('sprite');
+document.querySelectorAll('.dropdown-content button').forEach(b => b.onclick = ()=>create(b.dataset.type));
 
-document.getElementById('addGrid').addEventListener('click', ()=>create('grid'));
-document.querySelectorAll('.dropdown-content button').forEach(b => b.addEventListener('click', ()=>create(b.dataset.type)));
-document.getElementById('addWin').addEventListener('click', ()=>create('win_label'));
-document.getElementById('addLabel').addEventListener('click', ()=>create('label'));
-document.getElementById('addSprite').addEventListener('click', ()=>create('sprite'));
-
-canvas.addEventListener('mousemove', e=>{
-  [...canvas.querySelectorAll('.element')].forEach(el=>{
-    const rect = el.getBoundingClientRect(), hx = rect.right-6, hy = rect.bottom-6; // Handle is smaller now
-    // Simple hover detection is handled by CSS mostly now, but this keeps badge logic
-    if(!el.matches(':hover') && !el._resizing) hideBadge(el);
-  });
-});
-
+// --- DATA COLLECTION (Matching your Python Structure) ---
 function collectPayload() {
   const payload = {};
   const c = canvas.getBoundingClientRect();
-  function to1024(v, axis){ return Math.round(v/(axis===0?c.width:c.height)*1024); }
+  
+  // Scale to 1024x1024 or whatever reference
+  function toRef(v, axis) { return Math.round(v / (axis===0?c.width:c.height) * 1024); }
 
+  // 1. Single Elements (Buttons, Grid, Win Label)
   for (const k in elements) {
     if (k === 'labels' || k === 'sprites') continue;
     const el = elements[k];
-    if (!el) continue;
-    const d = getPos(el);
-    payload[k] = { x: to1024(d.x,0), y: to1024(d.y,1), width: to1024(d.width,0), height: to1024(d.height,1) };
+    if (el) {
+      const d = getPos(el);
+      payload[k] = { x: toRef(d.x,0), y: toRef(d.y,1), width: toRef(d.width,0), height: toRef(d.height,1) };
+    }
   }
 
+  // 2. Arrays (Labels)
   payload.Labels = elements.labels.map(l => {
-      const d = getPos(l);
-      return { x: to1024(d.x,0), y: to1024(d.y,1), width: to1024(d.width,0), height: to1024(d.height,1), text: l.firstElementChild ? l.firstElementChild.textContent : '' };
+    const d = getPos(l);
+    return { 
+      x: toRef(d.x,0), y: toRef(d.y,1), width: toRef(d.width,0), height: toRef(d.height,1), 
+      text: l.firstElementChild ? l.firstElementChild.textContent : '' 
+    };
   });
 
+  // 3. Arrays (Sprites)
   payload.Sprites = elements.sprites.map(s => {
-      const d = getPos(s);
-      return { x: to1024(d.x,0), y: to1024(d.y,1), width: to1024(d.width,0), height: to1024(d.height,1), text: s.firstElementChild ? s.firstElementChild.textContent : '' };
+    const d = getPos(s);
+    return { 
+      x: toRef(d.x,0), y: toRef(d.y,1), width: toRef(d.width,0), height: toRef(d.height,1), 
+      text: s.firstElementChild ? s.firstElementChild.textContent : '' 
+    };
   });
 
   payload.message = document.getElementById('msgInput').value;
   return payload;
 }
 
-sendButton.addEventListener('click', ()=>{
+// --- SEND LOGIC ---
+sendButton.addEventListener('click', () => {
   const payload = collectPayload();
-  document.getElementById("waitMessage").style.display="block";
+  const chatBox = document.getElementById("chatBox");
   
+  // Add User Message
+  const userMsg = document.createElement("div");
+  userMsg.className = "msg user";
+  userMsg.textContent = payload.message || "Generate Game Configuration";
+  chatBox.appendChild(userMsg);
+  
+  document.getElementById("waitMessage").style.display="block";
+  chatBox.scrollTop = chatBox.scrollHeight;
+
   fetch(`${url}/receive_message`, {
     method: "POST",
     headers: { "Content-Type":"application/json" },
     body: JSON.stringify({ session_id, rects: payload })
   })
   .then(res=>res.json())
-  .then(data=>{
+  .then(data => {
     document.getElementById("waitMessage").style.display="none";
     if (data.status === "True") {
-      const chatBox = document.getElementById("chatBox");
-      const userMsg = document.createElement("div");
-      userMsg.style.marginBottom = "8px";
-      userMsg.innerHTML = `<span style="color:#94a3b8; font-weight:bold;">You:</span> ${payload.message}`;
-      chatBox.appendChild(userMsg);
-      
       const botMsg = document.createElement("div");
-      botMsg.innerHTML = `<span style="color:#38bdf8; font-weight:bold;">Bot:</span> ${data.reply}`;
-      botMsg.style.marginBottom = "15px";
-      botMsg.style.paddingLeft = "10px";
-      botMsg.style.borderLeft = "2px solid #38bdf8";
+      botMsg.className = "msg bot";
+      botMsg.textContent = data.reply;
       chatBox.appendChild(botMsg);
       chatBox.scrollTop = chatBox.scrollHeight;
     } else {
       console.error("Error:", data.reply);
     }
   })
-  .catch(err=>{ console.error(err); document.getElementById("waitMessage").style.display="none"; });
+  .catch(err => { 
+    console.error(err); 
+    document.getElementById("waitMessage").style.display="none"; 
+  });
 });
 
+// --- STATUS CHECK ---
 function checkStatus(){
   fetch(`${url}/get_status`, {
     method:"POST",
@@ -762,23 +623,24 @@ function checkStatus(){
     const links = document.getElementById("links");
     
     if(percent>0 && percent<100){
-      progressContainer.style.display="block"; links.style.display="none"; 
+      progressContainer.style.display="block"; 
+      links.style.display="none"; 
       progressFill.style.width=percent+"%";
       sendButton.disabled=true;
-      sendButton.textContent = `Processing ${percent}%...`;
+      sendButton.textContent = `Generating... ${percent}%`;
     } else if(percent===100){
       progressFill.style.width="100%"; 
-      progressContainer.style.display="none"; // Hide bar when done
-      links.style.display="flex"; // Flex column
+      setTimeout(()=>{ progressContainer.style.display="none"; }, 1000);
+      links.style.display="flex"; 
       
       document.getElementById("playLink").href = url + data.game_link;
       document.getElementById("downloadLink").href = url + data.download_link;
       document.getElementById("downloadAnalysis").href = url + data.analysis_link;
       
       sendButton.disabled=false;
-      sendButton.textContent = "Generate Code";
+      sendButton.textContent = "Generate Game";
     } else {
-      progressContainer.style.display="none"; links.style.display="none"; progressFill.style.width="0%";
+      progressContainer.style.display="none";
     }
   })
   .catch(err=>console.error("Status error:", err));
