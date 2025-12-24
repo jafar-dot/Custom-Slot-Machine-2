@@ -84,21 +84,35 @@
     .btn.primary:hover { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
 
     /* --- DROPDOWN FIX --- */
-    .dropdown { position: relative; }
+    .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; /* Expand hover area slightly */ }
+    
     .dropdown-content {
       display: none;
       position: absolute;
-      top: calc(100% + 8px);
+      top: 100%; /* Align directly below */
+      margin-top: 5px; /* Visual gap */
       left: 0;
       flex-direction: column;
-      background: #1e293b; /* Dark Slate */
+      background: #1e293b; 
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 8px;
-      overflow: hidden;
+      overflow: visible; /* Changed to visible for the bridge */
       z-index: 1000;
       box-shadow: 0 10px 40px rgba(0,0,0,0.6);
       min-width: 220px;
     }
+
+    /* THE INVISIBLE BRIDGE: This fills the gap so mouse doesn't lose hover */
+    .dropdown-content::before {
+      content: "";
+      position: absolute;
+      top: -20px; /* Extends up to cover the gap */
+      left: 0;
+      width: 100%;
+      height: 20px;
+      background: transparent;
+    }
+
     .dropdown:hover .dropdown-content { display: flex; }
     
     .dropdown-content button {
@@ -109,16 +123,20 @@
       border-radius: 0;
       padding: 12px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
-      
-      /* FONT FIX: High contrast white */
       color: #ffffff; 
       font-weight: 500;
       font-size: 14px;
+      position: relative; /* Ensure it stays above bridge */
+      z-index: 1;
     }
+    /* First button rounded corners */
+    .dropdown-content button:first-child { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+    /* Last button rounded corners */
+    .dropdown-content button:last-child { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-bottom: none; }
     
     .dropdown-content button:hover {
-      background: rgba(56, 189, 248, 0.15); /* Light blue accent bg */
-      color: #38bdf8; /* Blue text */
+      background: rgba(56, 189, 248, 0.15); 
+      color: #38bdf8; 
     }
 
     /* --- LAYOUT --- */
@@ -126,7 +144,7 @@
       width: 100%;
       max-width: 1400px;
       display: grid;
-      grid-template-columns: 1fr 340px; /* Right panel fixed width */
+      grid-template-columns: 1fr 340px; 
       gap: 20px;
       height: 100%;
       min-height: 0;
@@ -143,14 +161,13 @@
       border: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);
       background-color: #0b1121;
-      /* Grid Pattern */
       background-image: 
         linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), 
         linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
       background-size: 32px 32px;
     }
 
-    /* --- RIGHT PANEL (Expanded Chat) --- */
+    /* --- RIGHT PANEL --- */
     .panel {
       background: var(--bg-panel);
       padding: 16px;
@@ -159,7 +176,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      height: 100%; /* Full height of grid cell */
+      height: 100%; 
       overflow: hidden;
     }
 
@@ -173,16 +190,12 @@
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Chat Styling */
     .chat-container {
       background: #020617;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.05);
       padding: 12px;
-      
-      /* Expand to fill available space */
       flex-grow: 1; 
-      
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -199,7 +212,6 @@
       word-wrap: break-word;
     }
 
-    /* User Bubble */
     .msg.user {
       align-self: flex-end;
       background: #1e293b;
@@ -208,7 +220,6 @@
       border-bottom-right-radius: 2px;
     }
 
-    /* Bot Bubble */
     .msg.bot {
       align-self: flex-start;
       background: rgba(56, 189, 248, 0.1);
@@ -216,10 +227,19 @@
       border: 1px solid rgba(56, 189, 248, 0.2);
       border-bottom-left-radius: 2px;
     }
+    
+    /* Error Message Style */
+    .msg.error {
+        align-self: flex-start;
+        background: rgba(239, 68, 68, 0.1);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-bottom-left-radius: 2px;
+    }
 
     .textarea {
       width: 100%;
-      height: 70px; /* Slightly smaller input to save space for chat */
+      height: 70px; 
       padding: 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -229,7 +249,7 @@
     }
     .textarea:focus { border-color: var(--accent-primary); }
 
-    /* --- ELEMENTS & UI --- */
+    /* --- ELEMENTS --- */
     .element {
       position: absolute;
       border-radius: 6px;
@@ -250,7 +270,6 @@
     }
     .element:active { cursor: grabbing; border-color: #fff; z-index: 50; }
 
-    /* Element Gradients */
     .grid { background: linear-gradient(135deg, rgba(37,99,235,0.8), rgba(29, 78, 216, 0.9)); }
     .play_button { background: linear-gradient(135deg, #10b981, #059669); }
     .auto_play_button { background: linear-gradient(135deg, #06b6d4, #0891b2); }
@@ -275,7 +294,6 @@
       pointer-events: none; z-index: 100;
     }
 
-    /* Context Menu */
     .context {
       position: absolute; display: none; flex-direction: column; gap: 10px; padding: 12px;
       border-radius: 8px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
@@ -288,7 +306,6 @@
     #btnDelete { background: #451a1a; color: #fca5a5; }
     #btnApply { background: var(--accent-primary); color: #000; }
 
-    /* Progress & Links */
     #progressContainer { height: 4px; background: #334155; border-radius: 2px; overflow: hidden; display: none; }
     #progressFill { height: 100%; width: 0%; background: var(--success); transition: width 0.3s; }
     #links { display: none; flex-direction: column; gap: 6px; }
@@ -340,7 +357,7 @@
         <div id="progressContainer"><div id="progressFill"></div></div>
         
         <div style="display:flex; justify-content:flex-end;">
-          <button class="btn primary" id="send">Generate Game</button>
+          <button class="btn primary" id="send">Send</button>
         </div>
 
         <div id="links">
@@ -378,7 +395,6 @@ const ctxX = document.getElementById('ctxX'),
       ctxText = document.getElementById('ctxText'),
       textRow = document.getElementById('textRow');
 
-// Storage for elements (Matches Python keys)
 const elements = {
   grid: null,
   play_button: null,
@@ -396,7 +412,6 @@ const elements = {
 
 let current = null;
 
-// --- Creation & Drag Logic ---
 function create(type) {
   if (type !== 'label' && type !== 'sprite' && elements[type]) return;
 
@@ -489,7 +504,6 @@ function startResize(e) {
   document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
 }
 
-// --- Context Menu ---
 function openContext(x, y) {
   const d = getPos(current);
   ctxX.value=d.x; ctxY.value=d.y; ctxW.value=d.width; ctxH.value=d.height;
@@ -530,15 +544,11 @@ document.getElementById('addLabel').onclick = ()=>create('label');
 document.getElementById('addSprite').onclick = ()=>create('sprite');
 document.querySelectorAll('.dropdown-content button').forEach(b => b.onclick = ()=>create(b.dataset.type));
 
-// --- DATA COLLECTION (Matching your Python Structure) ---
 function collectPayload() {
   const payload = {};
   const c = canvas.getBoundingClientRect();
-  
-  // Scale to 1024x1024 or whatever reference
   function toRef(v, axis) { return Math.round(v / (axis===0?c.width:c.height) * 1024); }
 
-  // 1. Single Elements (Buttons, Grid, Win Label)
   for (const k in elements) {
     if (k === 'labels' || k === 'sprites') continue;
     const el = elements[k];
@@ -548,7 +558,6 @@ function collectPayload() {
     }
   }
 
-  // 2. Arrays (Labels)
   payload.Labels = elements.labels.map(l => {
     const d = getPos(l);
     return { 
@@ -557,7 +566,6 @@ function collectPayload() {
     };
   });
 
-  // 3. Arrays (Sprites)
   payload.Sprites = elements.sprites.map(s => {
     const d = getPos(s);
     return { 
@@ -570,12 +578,10 @@ function collectPayload() {
   return payload;
 }
 
-// --- SEND LOGIC ---
 sendButton.addEventListener('click', () => {
   const payload = collectPayload();
   const chatBox = document.getElementById("chatBox");
   
-  // Add User Message
   const userMsg = document.createElement("div");
   userMsg.className = "msg user";
   userMsg.textContent = payload.message || "Generate Game Configuration";
@@ -584,12 +590,16 @@ sendButton.addEventListener('click', () => {
   document.getElementById("waitMessage").style.display="block";
   chatBox.scrollTop = chatBox.scrollHeight;
 
+  // Attempt to contact server
   fetch(`${url}/receive_message`, {
     method: "POST",
     headers: { "Content-Type":"application/json" },
     body: JSON.stringify({ session_id, rects: payload })
   })
-  .then(res=>res.json())
+  .then(res => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+  })
   .then(data => {
     document.getElementById("waitMessage").style.display="none";
     if (data.status === "True") {
@@ -603,12 +613,18 @@ sendButton.addEventListener('click', () => {
     }
   })
   .catch(err => { 
-    console.error(err); 
-    document.getElementById("waitMessage").style.display="none"; 
+    console.error("Fetch Error:", err); 
+    document.getElementById("waitMessage").style.display="none";
+    
+    // --- SERVER OUT / ERROR MESSAGE ---
+    const botMsg = document.createElement("div");
+    botMsg.className = "msg error";
+    botMsg.textContent = "Server out, try again later..";
+    chatBox.appendChild(botMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
   });
 });
 
-// --- STATUS CHECK ---
 function checkStatus(){
   fetch(`${url}/get_status`, {
     method:"POST",
@@ -638,12 +654,12 @@ function checkStatus(){
       document.getElementById("downloadAnalysis").href = url + data.analysis_link;
       
       sendButton.disabled=false;
-      sendButton.textContent = "Generate Game";
+      sendButton.textContent = "Send";
     } else {
       progressContainer.style.display="none";
     }
   })
-  .catch(err=>console.error("Status error:", err));
+  .catch(err=>console.error("Status error:", err)); // Silent fail for status check is usually okay
 }
 setInterval(checkStatus,1000);
 </script>
