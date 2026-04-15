@@ -432,6 +432,7 @@
     .link-button.publish { background: rgba(255,193,7,0.1); color: var(--logic); border-color: rgba(255,193,7,0.3); }
     .link-button.publish:hover { background: rgba(255,193,7,0.2); }
     .link-button.publish.published { background: var(--success-glow); color: var(--success); border-color: rgba(0,230,118,0.3); pointer-events: none; }
+    .link-button.publish.published-ok { background: var(--success-glow); color: var(--success); border-color: rgba(0,230,118,0.3); }
     .link-button.publish.publishing { opacity: 0.6; pointer-events: none; }
 
     #refreshLink {
@@ -652,6 +653,8 @@
       e.preventDefault();
       var btn = document.getElementById("publishLink");
       if (!session_id || !gameExists) { alert("No game to publish yet"); return; }
+      // Re-publish is always allowed: drop any 'published' lock from a prior click.
+      btn.classList.remove("published");
       btn.classList.add("publishing");
       btn.textContent = "⏳ Publishing...";
       fetch(url + "/publish_to_rgs", {
@@ -660,8 +663,12 @@
       }).then(function(r){return r.json();}).then(function(d){
         btn.classList.remove("publishing");
         if (d.success) {
-          btn.textContent = "✓ Published";
-          btn.classList.add("published");
+          btn.textContent = "✓ Published — click to re-publish";
+          btn.classList.add("published-ok");
+          setTimeout(function(){
+            btn.textContent = "🚀 Publish";
+            btn.classList.remove("published-ok");
+          }, 4000);
         } else {
           btn.textContent = "🚀 Publish";
           alert("Publish failed: " + (d.error || "unknown"));
